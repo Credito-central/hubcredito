@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painéis de Crédito - Sicoob UniMais Rio</title>
+<style>
+  :root{
+    --teal-dark: #0d3b3a;
+    --teal-bg: #134b48;
+    --teal-card: #1aab93;
+    --purple: #4a4a98;
+    --white: #ffffff;
+    --green-logo: #8dc63f;
+    --teal-logo: #00a99d;
+    --yellow: #ffd400;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: radial-gradient(circle at 30% 0%, #1f5e58, #0a2e2c 70%);
+    min-height: 100vh;
+    color: var(--white);
+  }
+
+  .logo-corner{
+    position: fixed;
+    top: 20px;
+    left: 24px;
+    z-index: 10;
+  }
+
+  .logo-corner img{
+    height: 42px;
+    display:block;
+  }
+
+  .page-header{
+    text-align:center;
+    padding: 60px 20px 40px;
+  }
+
+  .page-header h1{
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+
+  .page-header p{
+    margin-top: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.85);
+    max-width: 700px;
+    margin-left:auto;
+    margin-right:auto;
+    line-height: 1.5;
+  }
+
+  .alert-bar{
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    background: rgba(255,212,0,0.12);
+    border: 1px solid var(--yellow);
+    color: var(--yellow);
+    text-align:center;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .alert-bar a{
+    color: var(--yellow);
+    text-decoration: underline;
+    font-weight: 700;
+  }
+
+  main{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px 80px;
+    display:flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  /* ===================================================================
+     >>> BLOCO PADRÃO DE UM PAINEL (.panel-card) <<<
+     Para adicionar um novo painel: copie todo o elemento abaixo
+     marcado com "INÍCIO DO PAINEL" até "FIM DO PAINEL", cole depois
+     do último painel existente, e ajuste:
+       - data-anim (mantém o efeito de entrada)
+       - src da imagem (ex: images/im04.png)
+       - número e título em .panel-title
+       - texto em .panel-desc
+       - itens da lista <ul class="panel-list">
+       - href do botão "ACESSAR PAINEL"
+     =================================================================== */
+
+  .panel-card{
+    background: var(--teal-card);
+    border-radius: 14px;
+    overflow: hidden;
+    display:flex;
+    gap: 40px;
+    padding: 35px 40px;
+    align-items:center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s ease, transform 0.6s ease, box-shadow 0.3s ease;
+  }
+
+  .panel-card.visible{
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .panel-card:hover{
+    box-shadow: 0 20px 45px rgba(0,0,0,0.4);
+    transform: translateY(-6px);
+  }
+
+  .panel-image{
+    flex-shrink:0;
+    width: 320px;
+    height: 220px;
+    border-radius: 8px;
+    overflow:hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    transition: transform 0.4s ease;
+  }
+
+  .panel-card:hover .panel-image{
+    transform: scale(1.03);
+  }
+
+  .panel-image img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display:block;
+  }
+
+  .panel-content{
+    flex:1;
+    min-width: 0;
+  }
+
+  .panel-title{
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--teal-dark);
+    margin-bottom: 10px;
+  }
+
+  .panel-subtitle{
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--teal-dark);
+    margin-bottom: 14px;
+    line-height: 1.4;
+  }
+
+  .panel-desc{
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--teal-dark);
+    line-height: 1.55;
+    margin-bottom: 8px;
+  }
+
+  .panel-list{
+    list-style: none;
+    margin: 10px 0 22px;
+    padding: 0;
+  }
+
+  .panel-list li{
+    font-size: 14px;
+    color: var(--teal-dark);
+    line-height: 1.6;
+    padding-left: 18px;
+    position: relative;
+    margin-bottom: 6px;
+  }
+
+  .panel-list li::before{
+    content: "•";
+    position: absolute;
+    left: 0;
+    font-weight: 900;
+  }
+
+  .panel-list li strong{
+    font-weight: 800;
+  }
+
+  .access-btn{
+    display:inline-flex;
+    align-items:center;
+    gap: 8px;
+    background: var(--yellow);
+    color: var(--teal-dark);
+    font-weight: 800;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 24px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.25s ease, transform 0.15s ease, letter-spacing 0.25s ease;
+  }
+
+  .access-btn:hover{
+    background: var(--white);
+    letter-spacing: 1px;
+  }
+
+  .access-btn:active{
+    transform: scale(0.95);
+  }
+
+  /* ================== FIM DO BLOCO PADRÃO ================== */
+
+  @media (max-width: 800px){
+    .panel-card{
+      flex-direction: column;
+      padding: 25px;
+    }
+    .panel-image{
+      width: 100%;
+    }
+    .page-header h1{ font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="logo-corner">
+  <img src="images/sicoob.png" alt="Sicoob">
+</div>
+
+<div class="page-header">
+  <h1>PAINÉIS DE CRÉDITO</h1>
+  <p>Um diretório para centralizar os painéis produzidos no Power BI e no Sisbr Analítico relacionados ao tema crédito e assuntos adjacentes da Central.</p>
+</div>
+
+<div class="alert-bar">
+  ⚠️ Sem permissão para acessar o painel? Verifique as permissões necessárias com: <a href="mailto:credito.2016@sicoob.com.br">credito.2016@sicoob.com.br</a>
+</div>
+
+<main>
+
+  <!-- ==================== INÍCIO DO PAINEL 1 ==================== -->
+  <div class="panel-card" data-anim>
+    <div class="panel-image">
+      <img src="images/im01.png" alt="Painel de Gestão do Crédito">
+    </div>
+    <div class="panel-content">
+      <div class="panel-title">1 - Painel de Gestão do Crédito (Central)</div>
+      <p class="panel-desc">O Painel de Gestão do Crédito oferece uma visão analítica e estratégica da nossa carteira, estruturado nos seguintes pilares:</p>
+      <ul class="panel-list">
+        <li><strong>Visão Geral e Evolução:</strong> Série histórica da carteira, variações mensais de provisão, indicadores de entrada de BNDU e acompanhamento da carteira de prejuízo.</li>
+        <li><strong>Risco e Inadimplência:</strong> Análise das safras de entrada com maior índice de inadimplência, volume de atrasos por alçadas de crédito e classificação da carteira por estágios de risco.</li>
+        <li><strong>Rentabilidade e Precificação:</strong> Comparativo das taxas de juros praticadas em relação ao sistema regional, taxa DI e custos de captação (origem), além do prazo médio de pagamento das operações.</li>
+        <li><strong>Concentração e Segmentação:</strong> Distribuição do saldo devedor e da inadimplência detalhada por PA, modalidade e gerente. Inclui visões de concentração geográfica (mapa), exposição por CNAE e acompanhamento específico da carteira de cooperados PJ.</li>
+        <li><strong>Garantias e Limites:</strong> Volume da carteira com enquadramento de garantias e acompanhamento da Fábrica de Limites (série histórica e rentabilidade por perfil de segmentação).</li>
+        <li><strong>Simulações:</strong> Módulo PROV 05 com simulações dinâmicas de fechamento.</li>
+      </ul>
+      <!-- >>> Substitua o "#" abaixo pela URL real do painel (Power BI / Sisbr) <<< -->
+      <a href="#" class="access-btn" target="_blank">ACESSAR PAINEL</a>
+    </div>
+  </div>
+  <!-- ==================== FIM DO PAINEL 1 ==================== -->
+
+  <!-- ==================== INÍCIO DO PAINEL 2 ==================== -->
+  <div class="panel-card" data-anim>
+    <div class="panel-image">
+      <img src="images/im02.png" alt="Índice de Tempestividade do Crédito">
+    </div>
+    <div class="panel-content">
+      <div class="panel-title">2 - Índice de Tempestividade do Crédito (Sisbr Analítico)</div>
+      <p class="panel-desc">Indicador estratégico que mede o percentual de propostas concluídas dentro do SLA pactuado nacionalmente, considerando a quantidade de propostas, e não o valor financeiramente envolvido.</p>
+      <!--
+        >>> COMO INSERIR O LINK DE UM PAINEL <<<
+        Basta colar a URL real do Power BI / Sisbr Analítico dentro do
+        atributo href do link abaixo, substituindo o "#".
+        Exemplo (já aplicado neste painel):
+        href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?pathRef=..."
+        O target="_blank" mantém a abertura em uma nova aba - não remova.
+      -->
+      <a href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?pathRef=.public_folders/%25C3%2581rea%2BP%25C3%25BAblica%2B-%2BConsumidor/%25C3%2581rea%2BP%25C3%25BAblica%2Bdo%2BSicoob%2B-%2BConsumidor/N%25C3%25BAmeros%2Be%2BNeg%25C3%25B3cios/Pain%25C3%25A9is/05%2B-%2BMonitoramento%2Bde%2BCr%25C3%25A9dito/%25C3%258Dndice%2Bde%2BTempestividade%2Bdo%2BCr%25C3%25A9dito" class="access-btn" target="_blank">ACESSAR PAINEL</a>
+    </div>
+  </div>
+  <!-- ==================== FIM DO PAINEL 2 ==================== -->
+
+  <!-- ==================== INÍCIO DO PAINEL 3 ==================== -->
+  <div class="panel-card" data-anim>
+    <div class="panel-image">
+      <img src="images/im03.png" alt="Painel de Gestão da Esteira de Crédito">
+    </div>
+    <div class="panel-content">
+      <div class="panel-title">3 - Painel de Gestão da Esteira de Crédito (Sisbr Analítico)</div>
+      <p class="panel-desc">Monitoramento da Esteira de Crédito (atualização a cada 1 hora):</p>
+      <ul class="panel-list">
+        <li>Rastreamento do status das propostas em cada fase do processo.</li>
+        <li>Acompanhamento da taxa de conversão.</li>
+        <li>Comparativo de fluxo: volume de propostas de entrada versus operações liberadas.</li>
+      </ul>
+      <!-- >>> Substitua o "#" abaixo pela URL real do painel (Power BI / Sisbr) <<< -->
+      <a href="#" class="access-btn" target="_blank">ACESSAR PAINEL</a>
+    </div>
+  </div>
+  <!-- ==================== FIM DO PAINEL 3 ==================== -->
+
+</main>
+
+<footer style="text-align:center; font-size:12px; color:rgba(255,255,255,0.6); padding: 10px 20px 30px;">
+  Elaborado pela área de crédito - central 2016
+</footer>
+
+<script>
+  // Animação sutil de entrada: cada painel aparece com fade-in + slide-up
+  // conforme entra na área visível da tela (scroll reveal).
+  const panels = document.querySelectorAll('[data-anim]');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
+  panels.forEach((panel) => observer.observe(panel));
+</script>
+
+</body>
+</html>
