@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conheça Nossa Equipe</title>
+<style>
+  :root{
+    --teal-dark: #0d3b3a;
+    --teal: #00a99d;
+    --green: #8dc63f;
+    --white: #ffffff;
+    --gray-off: #c9c9c9;
+  }
+
+  *{ box-sizing: border-box; margin:0; padding:0; }
+
+  body{
+    font-family: 'Segoe UI', Arial, sans-serif;
+  }
+
+  /* =====================================================================
+     BANNER HORIZONTAL — altura reduzida para compor o portal junto com
+     outros elementos do SharePoint abaixo. Cores seguem o padrão visual
+     Sicoob (verde-petróleo escuro + verde-claro de contraste).
+     ===================================================================== */
+
+  .banner{
+    width: 100%;
+    background: linear-gradient(90deg, var(--teal-dark), var(--teal));
+    padding: 12px 24px;
+    display:flex;
+    align-items:center;
+    gap: 30px;
+    position: relative;
+  }
+
+  .banner-title{
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    color: var(--white);
+    font-size: 20px;
+    font-weight: 900;
+    text-decoration: none;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+    -webkit-text-stroke: 0.6px var(--teal-dark);
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 8px 18px;
+    border-radius: 8px;
+    transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+    cursor: pointer;
+  }
+
+  .banner-title .credit-icon{
+    width: 20px;
+    height: 20px;
+    flex-shrink:0;
+  }
+
+  .banner-title.btn-hover{
+    background: var(--green);
+    color: var(--teal-dark);
+    -webkit-text-stroke: 0px;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+  }
+
+  .banner-title.btn-hover .credit-icon path,
+  .banner-title.btn-hover .credit-icon circle,
+  .banner-title.btn-hover .credit-icon rect{
+    stroke: var(--teal-dark) !important;
+  }
+
+  .logo-corner{
+    position: absolute;
+    top: 50%;
+    right: 24px;
+    transform: translateY(-50%);
+  }
+
+  .logo-corner img{
+    height: 34px;
+    display:block;
+  }
+
+  .team-row{
+    display:flex;
+    align-items:center;
+    gap: 26px;
+    flex-wrap: wrap;
+    overflow-x: auto;
+    padding-right: 60px;
+  }
+
+  /* ===================== BLOCO DE RAMIFICAÇÃO (ÁREA) =====================
+     Cada área (Consultoria / Suporte e Comercial) é um bloco horizontal
+     com um pequeno rótulo lateral e a fileira de colaboradores ao lado.
+     Suporte e Comercial tem 2 sub-fileiras (Comercial e Rural).
+     ========================================================================= */
+
+  .area-block{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+  }
+
+  .area-title{
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    white-space: nowrap;
+  }
+
+  .sub-area{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+  }
+
+  .sub-area-label{
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--teal-dark);
+    background: var(--white);
+    padding: 2px 8px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+
+  .member-row{
+    display:flex;
+    gap: 12px;
+  }
+
+  /* ===================================================================
+     >>> CARD DE COLABORADOR (CÍRCULO COM NOME SOBREPOSTO) <<<
+     Gerado automaticamente pelo JS a partir do array "estrutura".
+     Para adicionar alguém: edite o array no final do arquivo.
+     =================================================================== */
+
+  .member{
+    position: relative;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--white);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.35);
+    flex-shrink: 0;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+
+  .member:hover{
+    transform: scale(1.12);
+    border-color: var(--green);
+    z-index: 2;
+  }
+
+  .member img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display:block;
+    transition: filter 0.3s ease;
+  }
+
+  .member.ferias img{
+    filter: grayscale(100%) brightness(0.6);
+  }
+
+  /* Nome sobreposto na parte inferior da foto, com contorno para legibilidade */
+  .member-name{
+    position:absolute;
+    bottom: 0; left:0; right:0;
+    font-size: 7.5px;
+    font-weight: 800;
+    color: var(--white);
+    text-align:center;
+    line-height: 1.1;
+    padding: 2px 1px 3px;
+    background: linear-gradient(to top, rgba(0,0,0,0.75), rgba(0,0,0,0));
+    -webkit-text-stroke: 0.3px rgba(0,0,0,0.6);
+  }
+
+  .ferias-tag{
+    display:block;
+    font-size: 7px;
+    font-weight: 800;
+    color: var(--gray-off);
+  }
+
+  /* Tooltip estilo "dica de ferramenta" que aparece acima da foto no hover */
+  .member-tooltip{
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%) translateY(4px);
+    background: var(--teal-dark);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 700;
+    white-space: nowrap;
+    padding: 5px 10px;
+    border-radius: 6px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.35);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 5;
+  }
+
+  .member-tooltip::after{
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--teal-dark);
+  }
+
+  .member:hover .member-tooltip{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .divider-v{
+    width: 1px;
+    height: 40px;
+    background: rgba(255,255,255,0.35);
+  }
+
+  @media (max-width: 900px){
+    .banner{ flex-wrap: wrap; gap: 14px; }
+    .team-row{ gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">
+  <!-- >>> Troque o href abaixo pelo link real da página/seção dentro do SharePoint <<< -->
+  <a class="banner-title" id="bannerTitle" href="https://record.r7.com/casa-do-patrao/" target="_self">
+    <svg class="credit-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="2" y="6" width="20" height="13" rx="2" stroke="#ffffff" stroke-width="1.8"/>
+      <rect x="2" y="9" width="20" height="3" fill="#ffffff"/>
+      <circle cx="6" cy="15.5" r="1" fill="#ffffff"/>
+    </svg>
+    Conheça nossa Equipe!
+  </a>
+
+  <div class="team-row" id="teamRow">
+    <!-- Os blocos de área e os cards são gerados automaticamente pelo JavaScript abaixo -->
+  </div>
+
+  <div class="logo-corner">
+    <img src="images/sicoob.png" alt="Sicoob">
+  </div>
+</div>
+
+<script>
+  // Destaque sutil no botão "Conheça nossa Equipe!" ao passar o mouse
+  const bannerTitle = document.getElementById('bannerTitle');
+  bannerTitle.addEventListener('mouseenter', () => {
+    bannerTitle.classList.add('btn-hover');
+  });
+  bannerTitle.addEventListener('mouseleave', () => {
+    bannerTitle.classList.remove('btn-hover');
+  });
+
+  /* =====================================================================
+     >>> COMO ADICIONAR UM NOVO COLABORADOR <<<
+     1. Suba a foto na pasta "images/" do repositório (ex: images/thais.jpg)
+     2. Copie um bloco abaixo e cole dentro do array correspondente à área.
+     3. Preencha nome, foto e datas de férias (formato "AAAA-MM-DD";
+        deixe null em ambos se a pessoa não estiver de férias).
+     ===================================================================== */
+
+  const estrutura = {
+    consultoria: {
+      titulo: "Consultoria",
+      membros: [
+        { nome: "Thais de Paula", foto: "images/thais.jpg", email: "thais.paula@sicoob.com.br", feriasInicio: null, feriasFim: null },
+        { nome: "Matheus Xavier", foto: "images/matheus.jpg", email: "matheus.xavier@sicoob.com.br", feriasInicio: null, feriasFim: null },
+        { nome: "Camila", foto: "images/camila.jpg", email: "camila@sicoob.com.br", feriasInicio: null, feriasFim: null }
+      ]
+    },
+    suporteComercial: {
+      titulo: "Suporte e Comercial",
+      subAreas: {
+        comercial: {
+          label: "Comercial",
+          membros: [
+            { nome: "Gisele Pavão", foto: "images/gisele.jpg", email: "gisele.pavao@sicoob.com.br", feriasInicio: null, feriasFim: null },
+            { nome: "Thamires", foto: "images/thamires.jpg", email: "thamires@sicoob.com.br", feriasInicio: null, feriasFim: null },
+            { nome: "Roberta Danielle", foto: "images/roberta.jpg", email: "roberta.danielle@sicoob.com.br", feriasInicio: null, feriasFim: null }
+          ]
+        },
+        rural: {
+          label: "Rural",
+          membros: [
+            { nome: "Dilermando", foto: "images/dilermando.jpg", email: "dilermando@sicoob.com.br", feriasInicio: null, feriasFim: null },
+            { nome: "Denise Francisca", foto: "images/denise.jpg", email: "denise.francisca@sicoob.com.br", feriasInicio: null, feriasFim: null }
+          ]
+        }
+      }
+    }
+  };
+  /* ===================== FIM DA ESTRUTURA DA EQUIPE ===================== */
+
+  const hoje = new Date();
+
+  function estaDeFerias(m) {
+    if (!m.feriasInicio || !m.feriasFim) return false;
+    const inicio = new Date(m.feriasInicio);
+    const fim = new Date(m.feriasFim);
+    return hoje >= inicio && hoje <= fim;
+  }
+
+  function criarCardMembro(m) {
+    const emFerias = estaDeFerias(m);
+    const link = document.createElement('a');
+    link.href = `https://teams.microsoft.com/l/chat/0/0?users=${m.email}`;
+    link.target = "_blank";
+    link.title = `Abrir conversa no Teams com ${m.nome}`;
+    link.style.textDecoration = "none";
+
+    const card = document.createElement('div');
+    card.className = 'member' + (emFerias ? ' ferias' : '');
+    card.innerHTML = `
+      <img src="${m.foto}" alt="${m.nome}">
+      <div class="member-name">
+        ${m.nome}
+        ${emFerias ? '<span class="ferias-tag">Indisponível</span>' : ''}
+      </div>
+      <div class="member-tooltip">${m.nome}${emFerias ? ' (Indisponível)' : ' • Abrir no Teams'}</div>
+    `;
+    link.appendChild(card);
+    return link;
+  }
+
+  function criarFileiraMembros(membros) {
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    membros.forEach((m) => row.appendChild(criarCardMembro(m)));
+    return row;
+  }
+
+  const teamRow = document.getElementById('teamRow');
+
+  // --- Bloco Suporte e Comercial (com sub-áreas) ---
+  const blocoSuporte = document.createElement('div');
+  blocoSuporte.className = 'area-block';
+  blocoSuporte.innerHTML = `<div class="area-title">${estrutura.suporteComercial.titulo}</div>`;
+
+  const subAreasWrap = document.createElement('div');
+  subAreasWrap.style.display = 'flex';
+  subAreasWrap.style.alignItems = 'center';
+  subAreasWrap.style.gap = '18px';
+
+  Object.values(estrutura.suporteComercial.subAreas).forEach((sub) => {
+    const subDiv = document.createElement('div');
+    subDiv.className = 'sub-area';
+    subDiv.innerHTML = `<div class="sub-area-label">${sub.label}</div>`;
+    subDiv.appendChild(criarFileiraMembros(sub.membros));
+    subAreasWrap.appendChild(subDiv);
+  });
+
+  blocoSuporte.appendChild(subAreasWrap);
+  teamRow.appendChild(blocoSuporte);
+
+  // --- Divisória ---
+  const divisor = document.createElement('div');
+  divisor.className = 'divider-v';
+  teamRow.appendChild(divisor);
+
+  // --- Bloco Consultoria ---
+  const blocoConsultoria = document.createElement('div');
+  blocoConsultoria.className = 'area-block';
+  blocoConsultoria.innerHTML = `<div class="area-title">${estrutura.consultoria.titulo}</div>`;
+  blocoConsultoria.appendChild(criarFileiraMembros(estrutura.consultoria.membros));
+  teamRow.appendChild(blocoConsultoria);
+</script>
+
+</body>
+</html>
