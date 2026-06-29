@@ -75,15 +75,13 @@
     stroke: var(--teal-dark) !important;
   }
 
+  /* >>> LOGO posicionada no canto superior esquerdo, acima de "Crédito - Central 2016" <<< */
   .logo-corner{
-    position: absolute;
-    top: 50%;
-    right: 24px;
-    transform: translateY(-50%);
+    flex-shrink:0;
   }
 
   .logo-corner img{
-    height: 34px;
+    height: 26px;
     display:block;
   }
 
@@ -93,7 +91,6 @@
     gap: 26px;
     flex-wrap: wrap;
     overflow-x: auto;
-    padding-right: 60px;
   }
 
   /* ===================== BLOCO DE RAMIFICAÇÃO (ÁREA) =====================
@@ -247,6 +244,9 @@
 <div class="banner">
   <!-- >>> Troque o href abaixo pelo link real da página/seção dentro do SharePoint <<< -->
   <div style="display:flex; flex-direction:column; align-items:flex-start; gap:4px; flex-shrink:0;">
+    <div class="logo-corner">
+      <img src="images/sicoob.png" alt="Sicoob">
+    </div>
     <span style="color:#ffffff; font-size:11px; font-weight:800; letter-spacing:0.4px; text-transform:uppercase; opacity:0.9;">
       Crédito - Central 2016
     </span>
@@ -262,10 +262,6 @@
 
   <div class="team-row" id="teamRow">
     <!-- Os blocos de área e os cards são gerados automaticamente pelo JavaScript abaixo -->
-  </div>
-
-  <div class="logo-corner">
-    <img src="images/sicoob.png" alt="Sicoob">
   </div>
 </div>
 
@@ -283,7 +279,7 @@
      >>> COMO ADICIONAR UM NOVO COLABORADOR <<<
      1. Suba a foto na pasta "images/" do repositório (ex: images/thais.jpg)
      2. Copie um bloco abaixo e cole dentro do array correspondente à área.
-     3. Preencha nome, foto e datas de férias (formato "AAAA-MM-DD";
+     3. Preencha nome, foto, e-mail e datas de férias (formato "AAAA-MM-DD";
         deixe null em ambos se a pessoa não estiver de férias).
      ===================================================================== */
 
@@ -394,3 +390,4 @@
 </script>
 
 </body>
+</html>
