@@ -88,7 +88,7 @@
   }
 
   /* ===================================================================
-     >>> BLOCO PADRÃO DE UM PAINEL (.panel-card) <<<
+     >>> BLOCO PADRÃO DE UM PAINEL (.panel-card) <
      Para adicionar um novo painel: copie todo o elemento abaixo
      marcado com "INÍCIO DO PAINEL" até "FIM DO PAINEL", cole depois
      do último painel existente, e ajuste:
@@ -199,6 +199,26 @@
     font-weight: 800;
   }
 
+  /* >>> NOVO: nota de instrução (ex: formulário de inscrição + chamado) <<< */
+  .panel-note{
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--teal-dark);
+    line-height: 1.6;
+    margin: 4px 0 22px;
+  }
+
+  .panel-link{
+    color: var(--teal-dark);
+    text-decoration: underline;
+    font-weight: 800;
+    transition: color 0.2s ease;
+  }
+
+  .panel-link:hover{
+    color: var(--white);
+  }
+
   .access-btn{
     display:inline-flex;
     align-items:center;
@@ -272,7 +292,6 @@
         <li><strong>Garantias e Limites:</strong> Volume da carteira com enquadramento de garantias e acompanhamento da Fábrica de Limites (série histórica e rentabilidade por perfil de segmentação).</li>
         <li><strong>Simulações:</strong> Módulo PROV 05 com simulações dinâmicas de fechamento.</li>
       </ul>
-      <!-- >>> Substitua o "#" abaixo pela URL real do painel (Power BI / Sisbr) <<< -->
       <a href="https://app.powerbi.com/links/uHapUZlz2C?ctid=b417b620-2ae9-4a83-ab6c-7fbd828bda1d&pbi_source=linkShare" class="access-btn" target="_blank">ACESSAR PAINEL</a>
     </div>
   </div>
@@ -286,14 +305,6 @@
     <div class="panel-content">
       <div class="panel-title">2 - Índice de Tempestividade do Crédito (Sisbr Analítico)</div>
       <p class="panel-desc">Indicador estratégico que mede o percentual de propostas concluídas dentro do SLA pactuado nacionalmente, considerando a quantidade de propostas, e não o valor financeiramente envolvido.</p>
-      <!--
-        >>> COMO INSERIR O LINK DE UM PAINEL <<<
-        Basta colar a URL real do Power BI / Sisbr Analítico dentro do
-        atributo href do link abaixo, substituindo o "#".
-        Exemplo (já aplicado neste painel):
-        href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?pathRef=..."
-        O target="_blank" mantém a abertura em uma nova aba - não remova.
-      -->
       <a href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?pathRef=.public_folders/%25C3%2581rea%2BP%25C3%25BAblica%2B-%2BConsumidor/%25C3%2581rea%2BP%25C3%25BAblica%2Bdo%2BSicoob%2B-%2BConsumidor/N%25C3%25BAmeros%2Be%2BNeg%25C3%25B3cios/Pain%25C3%25A9is/05%2B-%2BMonitoramento%2Bde%2BCr%25C3%25A9dito/%25C3%258Dndice%2Bde%2BTempestividade%2Bdo%2BCr%25C3%25A9dito" class="access-btn" target="_blank">ACESSAR PAINEL</a>
     </div>
   </div>
@@ -312,11 +323,11 @@
         <li>Acompanhamento da taxa de conversão.</li>
         <li>Comparativo de fluxo: volume de propostas de entrada versus operações liberadas.</li>
       </ul>
-      <!-- >>> Substitua o "#" abaixo pela URL real do painel (Power BI / Sisbr) <<< -->
       <a href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?pathRef=.public_folders%2F%25C3%2581rea%2BP%25C3%25BAblica%2B-%2BConsumidor%2F%25C3%2581rea%2BP%25C3%25BAblica%2Bdo%2BSicoob%2B-%2BConsumidor%2FN%25C3%25BAmeros%2Be%2BNeg%25C3%25B3cios%2FPain%25C3%25A9is%2F05%2B-%2BMonitoramento%2Bde%2BCr%25C3%25A9dito%2FPainel%2Bde%2BGest%25C3%25A3o%2Bda%2BEsteira%2Bde%2BCr%25C3%25A9dito" class="access-btn" target="_blank">ACESSAR PAINEL</a>
     </div>
   </div>
   <!-- ==================== FIM DO PAINEL 3 ==================== -->
+
   <!-- ==================== INÍCIO DO PAINEL 4 ==================== -->
   <div class="panel-card" data-anim>
     <div class="panel-image">
@@ -331,12 +342,32 @@
         <li>Participação no mercado de cooperados com a PD até 5,46% para elaboração de ações comerciais. </li>
         <li>Saldo Devedor de acordo com o status de risco do CRL. Carteira de acordo com atividade fim. Taxas Medias. </li>
       </ul>
-      <!-- >>> Substitua o "#" abaixo pela URL real do painel (Power BI / Sisbr) <<< -->
       <a href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?pathRef=.public_folders%2F%25C3%2581rea%2BP%25C3%25BAblica%2B-%2BConsumidor%2F%25C3%2581rea%2BP%25C3%25BAblica%2Bdo%2BSicoob%2B-%2BConsumidor%2FN%25C3%25BAmeros%2Be%2BNeg%25C3%25B3cios%2FPain%25C3%25A9is%2FDrill%2BThru%2FGest%25C3%25A3o%2Bda%2BCarteira%2Bde%2BCr%25C3%25A9dito%2FVis%25C3%25A3o%2BGeral" class="access-btn" target="_blank">ACESSAR PAINEL</a>
     </div>
   </div>
   <!-- ==================== FIM DO PAINEL 4 ==================== -->
 
+  <!-- ==================== INÍCIO DO PAINEL 5 ==================== -->
+  <div class="panel-card" data-anim>
+    <div class="panel-image">
+      <img src="images/im05.png" alt="Painel De Supervião Auxiliar (PASA)">
+    </div>
+    <div class="panel-content">
+      <div class="panel-title">5 - Painel De Supervião Auxiliar (PASA) (Sisbr Analítico)</div>
+      <p class="panel-desc">O PASA reúne dados estratégicos, roteiros e informações sobre indicadores-chave, concentrando-se na avaliação da situação econômico-financeira e nas diversas dimensões de risco da entidade. O acesso é direcionado a técnicos operacionais e gestores, mediante liberação prévia da diretoria da cooperativa.</p>
+      <ul class="panel-list">
+        <li>A plataforma oferece uma visão abrangente por meio de um painel explicativo das classificações e do histórico de indicadores, viabilizando o monitoramento contínuo dos modelos de risco. Para o controle da carteira, o sistema mapeia ativos problemáticos, os 5% maiores devedores e os maiores aumentos de provisão, além de identificar alertas importantes, como indícios de rolagem de dívidas e casos de recuperação judicial. Adicionalmente, a ferramenta avalia a suficiência de garantias gerais e reais, cruza informações de contrapartes.</li>
+      </ul>
+
+      <!-- >>> NOVO: instrução de inscrição + abertura de chamado <<< -->
+      <p class="panel-note">
+        Acesse o <a href="https://sicoob.sharepoint.com/sites/credito2016/_layouts/15/guestaccess.aspx?share=IQCMxIoo91ooTpADLZKtkeyPAVFu5mPogQ9qTt-P-p0hVhs&e=TQODKa" class="panel-link" target="_blank">formulário para inscrição</a>. Posteriormente, abra um chamado para a equipe de SisbrAnalítico do CCS.
+      </p>
+
+      <a href="https://sisbranalitico.sisbr.coop.br/sisbranalitico/bi/?perspective=dashboard&pathRef=.public_folders%2F%25C3%2581rea%2BP%25C3%25BAblica%2B-%2BConsumidor%2F%25C3%2581rea%2BP%25C3%25BAblica%2Bdo%2BSicoob%2B-%2BConsumidor%2FN%25C3%25BAmeros%2Be%2BNeg%25C3%25B3cios%2FPain%25C3%25A9is%2Bda%2BSupervis%25C3%25A3o%2BAuxiliar%2B-%2BPASA%2FPain%25C3%25A9is%2Bda%2BSupervis%25C3%25A3o%2BAuxiliar%2B-%2BPASA&action=view&mode=dashboard" class="access-btn" target="_blank">ACESSAR PAINEL</a>
+    </div>
+  </div>
+  <!-- ==================== FIM DO PAINEL 5 ==================== -->
 
 </main>
 
@@ -345,8 +376,6 @@
 </footer>
 
 <script>
-  // Animação sutil de entrada: cada painel aparece com fade-in + slide-up
-  // conforme entra na área visível da tela (scroll reveal).
   const panels = document.querySelectorAll('[data-anim]');
 
   const observer = new IntersectionObserver((entries) => {
