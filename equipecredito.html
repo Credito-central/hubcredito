@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Equipe de Crédito Sicoob</title>
+    <!-- FontAwesome para os ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Fonte Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sicoob-turquesa: #00AE9D;
+            --sicoob-verde-medio: #7DB61C;
+            --sicoob-verde-claro: #C9D200;
+            --sicoob-verde-escuro: #003641;
+            --sicoob-roxo: #49479D;
+            --bg-card: #ffffff;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--sicoob-verde-escuro);
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 1rem 3rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 { 
+            margin: 0; 
+            font-size: 3.5rem; 
+            font-weight: 900; 
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .subtitle {
+            margin-top: 1rem;
+            font-size: 1.2rem;
+            font-weight: 500;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .team-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+            display: flex;
+            flex-direction: column;
+            gap: 4rem;
+        }
+
+        /* ORGANOGRAMA (Eixos de Atuação) */
+        .organogram-section {
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .organogram-section h2.section-title {
+            color: #fff;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            display: block;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .org-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        .org-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 2rem;
+            color: var(--sicoob-verde-escuro);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+
+        .org-card h3 {
+            margin: 0 0 1.5rem 0;
+            font-size: 1.5rem;
+            color: var(--sicoob-turquesa);
+            text-align: center;
+            text-transform: uppercase;
+        }
+        
+        .org-card.consultoria h3 { color: var(--sicoob-verde-medio); }
+
+        .org-card ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .org-card li {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background: #f4f7f6;
+            border-radius: 8px;
+            border-left: 4px solid var(--sicoob-turquesa);
+        }
+
+        .org-card.consultoria li { border-left-color: var(--sicoob-verde-medio); }
+
+        .org-card li i {
+            font-size: 1.4rem;
+            color: var(--sicoob-verde-escuro);
+        }
+
+        /* CARD DIRETORIA */
+        .director-card {
+            background: linear-gradient(135deg, var(--sicoob-roxo), #2a2860);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            padding: 2rem;
+            gap: 2.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+            color: #fff;
+        }
+
+        .director-photo {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--sicoob-verde-claro);
+            flex-shrink: 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .director-info h2 {
+            margin: 0;
+            font-size: 2.2rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .director-info h4 {
+            margin: 0.5rem 0 1rem 0;
+            font-size: 1.2rem;
+            color: var(--sicoob-verde-claro);
+            text-transform: uppercase;
+        }
+
+        .director-info p {
+            margin: 0;
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* BLOCOS DE SEÇÃO DOS COLABORADORES */
+        .section-block {
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .block-suporte { background-color: var(--sicoob-turquesa); }
+        .block-consultoria { background-color: var(--sicoob-verde-medio); }
+        
+        .block-rural {
+            background-color: var(--sicoob-verde-claro);
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-top: 3rem;
+            box-shadow: inset 0 8px 20px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            margin: 0 0 3rem 0;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--sicoob-verde-escuro);
+            text-transform: uppercase;
+            border-bottom: 4px solid rgba(0, 54, 65, 0.15);
+            padding-bottom: 1rem;
+            display: inline-block;
+        }
+        
+        .block-consultoria .section-title { color: #ffffff; border-bottom-color: rgba(255,255,255,0.3); }
+
+        /* CARD DO COLABORADOR */
+        .member-card {
+            position: relative; 
+            display: flex;
+            align-items: stretch;
+            background: var(--bg-card);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            padding: 2.5rem;
+            gap: 3.5rem;
+            margin-bottom: 2rem;
+            color: var(--sicoob-verde-escuro);
+            overflow: hidden; 
+        }
+
+        .member-card:last-child { margin-bottom: 0; }
+
+        /* ÍCONES FLUTUANTES (4 Segundos) */
+        .floating-icon {
+            position: absolute;
+            font-size: 8rem;
+            bottom: -20%;
+            right: 5%;
+            color: transparent;
+            -webkit-text-stroke: 2px rgba(0, 54, 65, 0.15);
+            filter: drop-shadow(4px 10px 8px rgba(0,0,0,0.1));
+            pointer-events: none; 
+            z-index: 0;
+            animation: floatUpEffect 4s ease-out forwards;
+        }
+
+        @keyframes floatUpEffect {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            100% { transform: translateY(-150px) rotate(15deg); opacity: 0; }
+        }
+
+        /* ÁREA ESQUERDA: O Envelope */
+        .envelope-wrapper {
+            position: relative;
+            width: 320px;
+            height: 380px; 
+            flex-shrink: 0;
+            perspective: 1000px;
+            z-index: 2;
+            align-self: center; 
+        }
+
+        .envelope-front {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 25%;
+            background: linear-gradient(135deg, var(--sicoob-verde-escuro), #001f26);
+            border-radius: 0 0 12px 12px;
+            z-index: 3;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.15);
+        }
+
+        .envelope-back {
+            position: absolute;
+            bottom: 0; left: 0; width: 100%; height: 90%;
+            background: #e0e5e9;
+            border-radius: 12px;
+            z-index: 1;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.05);
+        }
+
+        .member-photo {
+            position: absolute;
+            bottom: 12%; left: 5%; width: 90%; height: 85%;
+            object-fit: cover;
+            border-radius: 8px;
+            z-index: 2;
+            transition: bottom 0.6s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.6s ease;
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+            border: 4px solid #fff;
+            background-color: #ccc;
+        }
+
+        .envelope-wrapper:hover .member-photo {
+            bottom: 28%;
+            transform: scale(1.03);
+        }
+
+        /* ÁREA DIREITA: Informações */
+        .member-info { 
+            flex-grow: 1; 
+            z-index: 2; 
+            position: relative; 
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .member-info h2 {
+            margin: 0 0 0.2rem 0;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--sicoob-verde-escuro);
+            text-transform: uppercase;
+        }
+
+        .member-info h4 {
+            margin: 0 0 1rem 0;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--sicoob-roxo);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .member-info p {
+            line-height: 1.6;
+            color: #444;
+            margin-bottom: 2rem;
+            font-size: 1.05rem;
+            font-weight: 500;
+            text-align: justify; 
+        }
+
+        /* Botões */
+        .actions { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: auto; }
+        .btn {
+            display: flex; align-items: center; justify-content: center;
+            gap: 0.6rem; padding: 0.8rem 1.5rem; border-radius: 8px;
+            text-decoration: none; font-weight: 700; font-size: 0.9rem;
+            transition: all 0.3s ease; color: #fff; text-transform: uppercase;
+        }
+        .btn-teams { background-color: var(--sicoob-roxo); }
+        .btn-teams:hover { background-color: #38367a; transform: translateY(-3px); }
+        .btn-email { background-color: var(--sicoob-turquesa); }
+        .btn-email:hover { background-color: #008f81; transform: translateY(-3px); }
+        .btn-linkedin { background-color: var(--sicoob-verde-escuro); }
+        .btn-linkedin:hover { background-color: #001f26; transform: translateY(-3px); }
+
+        @media (max-width: 1024px) {
+            .member-card { flex-direction: column; text-align: left; padding: 2rem; }
+            .envelope-wrapper { margin: 0 auto; width: 100%; max-width: 320px; align-self: center; }
+            .member-info p { text-align: left; }
+            .actions { justify-content: flex-start; }
+            .org-grid { grid-template-columns: 1fr; }
+            .director-card { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Equipe de Crédito</h1>
+        <p class="subtitle">Conheça os profissionais que impulsionam o Comercial, Suporte e Consultoria Técnica na nossa Central.</p>
+    </header>
+
+    <main class="team-container">
+        
+        <!-- EIXOS DE ATUAÇÃO (Organograma Explicativo) -->
+        <section class="organogram-section">
+            <h2 class="section-title">Eixos de Atuação</h2>
+            
+            <div class="org-grid">
+                <!-- Área 1 -->
+                <div class="org-card">
+                    <h3>Suporte e Fomento ao Crédito</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-users"></i> Produtos de Crédito PF e PJ</li>
+                        <li><i class="fa-solid fa-hand-holding-dollar"></i> Fomento ao Crédito Comercial</li>
+                        <li><i class="fa-solid fa-leaf"></i> Fomento a Crédito Rural e Câmbio</li>
+                    </ul>
+                </div>
+
+                <!-- Área 2 -->
+                <div class="org-card consultoria">
+                    <h3>Consultoria Técnica</h3>
+                    <ul>
+                        <li><i class="fa-solid fa-gears"></i> Gestão Preditiva e Automação</li>
+                        <li><i class="fa-solid fa-file-contract"></i> Assessoria em Políticas e Processos</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- CARD DIRETORA EXECUTIVA -->
+        <section>
+            <div class="director-card">
+                <img src="https://images.unsplash.com/photo-1594744803329-e58b31de8bf5?auto=format&fit=crop&q=80&w=400" alt="Nabia Jorge" class="director-photo">
+                <div class="director-info">
+                    <h2>Nabia Jorge</h2>
+                    <h4>Diretora Executiva</h4>
+                    <p>Responsável pela equipe de crédito da Central UniMais Rio.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- BLOCO 1: COMERCIAL E SUPORTE -->
+        <section class="section-block block-suporte">
+            <h2 class="section-title">1 - Comercial e Suporte</h2>
+
+            <!-- Comercial: Gisele -->
+            <div class="member-card" data-icon="fa-handshake">
+                <div class="envelope-wrapper js-tilt">
+                    <div class="envelope-back"></div>
+                    <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=800" alt="Foto Gisele" class="member-photo">
+                    <div class="envelope-front"></div>
+                </div>
+                <div class="member-info">
+                    <h2>Gisele Pavão</h2>
+                    <h4>Analista Comercial</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                    <div class="actions">
+                        <a href="https://teams.microsoft.com/l/chat/0/0?users=gisele.pavao@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                        <a href="mailto:gisele.pavao@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                        <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comercial: Thamires -->
+            <div class="member-card" data-icon="fa-chart-line">
+                <div class="envelope-wrapper js-tilt">
+                    <div class="envelope-back"></div>
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=800" alt="Foto Thamires" class="member-photo">
+                    <div class="envelope-front"></div>
+                </div>
+                <div class="member-info">
+                    <h2>Thamires Caldeira</h2>
+                    <h4>Especialista Comercial</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                    <div class="actions">
+                        <a href="https://teams.microsoft.com/l/chat/0/0?users=thamires.caldeira@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                        <a href="mailto:thamires.caldeira@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                        <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comercial: Roberta -->
+            <div class="member-card" data-icon="fa-users-gear">
+                <div class="envelope-wrapper js-tilt">
+                    <div class="envelope-back"></div>
+                    <img src="https://images.unsplash.com/photo-1598550874175-4d0ef436c909?auto=format&fit=crop&q=80&w=800" alt="Foto Roberta" class="member-photo">
+                    <div class="envelope-front"></div>
+                </div>
+                <div class="member-info">
+                    <h2>Roberta Pires</h2>
+                    <h4>Consultora de Suporte Comercial</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                    <div class="actions">
+                        <a href="https://teams.microsoft.com/l/chat/0/0?users=roberta.pires@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                        <a href="mailto:roberta.pires@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                        <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAMIFICAÇÃO: RURAL -->
+            <div class="block-rural">
+                <h2 class="section-title" style="color: var(--sicoob-verde-escuro); margin-bottom: 2rem;">Ramificação: Rural</h2>
+                
+                <!-- Rural: Dilermando -->
+                <div class="member-card" data-icon="fa-seedling">
+                    <div class="envelope-wrapper js-tilt">
+                        <div class="envelope-back"></div>
+                        <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&q=80&w=800" alt="Foto Dilermando" class="member-photo">
+                        <div class="envelope-front"></div>
+                    </div>
+                    <div class="member-info">
+                        <h2>Dilermando Benevenuto</h2>
+                        <h4>Especialista em Crédito Rural</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                        <div class="actions">
+                            <a href="https://teams.microsoft.com/l/chat/0/0?users=dilermando.benevenuto@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                            <a href="mailto:dilermando.benevenuto@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                            <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rural: Denise -->
+                <div class="member-card" data-icon="fa-tractor">
+                    <div class="envelope-wrapper js-tilt">
+                        <div class="envelope-back"></div>
+                        <img src="https://images.unsplash.com/photo-1588516903720-8ceb67f9efd4?auto=format&fit=crop&q=80&w=800" alt="Foto Denise" class="member-photo">
+                        <div class="envelope-front"></div>
+                    </div>
+                    <div class="member-info">
+                        <h2>Denise Francisca</h2>
+                        <h4>Analista de Crédito Rural</h4>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                        <div class="actions">
+                            <a href="https://teams.microsoft.com/l/chat/0/0?users=denise.francisca@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                            <a href="mailto:denise.francisca@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                            <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- Fim Bloco Rural -->
+        </section>
+
+        <!-- BLOCO 2: CONSULTORIA TÉCNICA -->
+        <section class="section-block block-consultoria">
+            <h2 class="section-title">2 - Consultoria Técnica</h2>
+
+            <!-- Consultoria: Thais -->
+            <div class="member-card" data-icon="fa-comments">
+                <div class="envelope-wrapper js-tilt">
+                    <div class="envelope-back"></div>
+                    <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?auto=format&fit=crop&q=80&w=800" alt="Foto Thais" class="member-photo">
+                    <div class="envelope-front"></div>
+                </div>
+                <div class="member-info">
+                    <h2>Thais de Paula</h2>
+                    <h4>Consultora Estratégica</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                    <div class="actions">
+                        <a href="https://teams.microsoft.com/l/chat/0/0?users=thais.depaula@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                        <a href="mailto:thais.depaula@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                        <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consultoria: Matheus -->
+            <div class="member-card" data-icon="fa-file-excel">
+                <div class="envelope-wrapper js-tilt">
+                    <div class="envelope-back"></div>
+                    <img src="https://images.unsplash.com/photo-1557862921-37829c790f19?auto=format&fit=crop&q=80&w=800" alt="Foto Matheus" class="member-photo">
+                    <div class="envelope-front"></div>
+                </div>
+                <div class="member-info">
+                    <h2>Matheus Xavier</h2>
+                    <h4>Especialista em Dados e Relatórios</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                    <div class="actions">
+                        <a href="https://teams.microsoft.com/l/chat/0/0?users=matheus.xavier@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                        <a href="mailto:matheus.xavier@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                        <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Consultoria: Camila -->
+            <div class="member-card" data-icon="fa-briefcase">
+                <div class="envelope-wrapper js-tilt">
+                    <div class="envelope-back"></div>
+                    <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=800" alt="Foto Camila" class="member-photo">
+                    <div class="envelope-front"></div>
+                </div>
+                <div class="member-info">
+                    <h2>Camila Santana</h2>
+                    <h4>Consultora de Negócios</h4>
+                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam in dui mauris. Vivamus hendrerit arcu sed erat molestie vehicula. Sed auctor neque eu tellus rhoncus ut eleifend nibh porttitor. Ut in nulla enim. Phasellus molestie magna non est bibendum non venenatis nisl tempor. Suspendisse dictum feugiat nisl ut dapibus. Mauris iaculis porttitor posuere. Praesent id metus massa, ut blandit odio. Proin quis tortor orci. Etiam at risus et justo dignissim congue. Donec congue lacinia dui, a porttitor lectus condimentum laoreet.</p>
+                    <div class="actions">
+                        <a href="https://teams.microsoft.com/l/chat/0/0?users=camila.santana@sicoob.com.br" target="_blank" class="btn btn-teams"><i class="fa-brands fa-windows"></i> Teams</a>
+                        <a href="mailto:camila.santana@sicoob.com.br" class="btn btn-email"><i class="fa-solid fa-envelope"></i> E-mail</a>
+                        <a href="#" target="_blank" class="btn btn-linkedin"><i class="fa-brands fa-linkedin-in"></i> LinkedIn</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Scripts Interativos -->
+    <script>
+        // 1. Efeito 3D Envelope (Apenas nos cards da equipe)
+        document.querySelectorAll('.js-tilt').forEach(wrapper => {
+            wrapper.addEventListener('mousemove', (e) => {
+                const rect = wrapper.getBoundingClientRect();
+                const x = e.clientX - rect.left; 
+                const y = e.clientY - rect.top;  
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const rotateX = ((y - centerY) / centerY) * -12; 
+                const rotateY = ((x - centerX) / centerX) * 12;
+
+                const photo = wrapper.querySelector('.member-photo');
+                photo.style.transform = `scale(1.05) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            });
+
+            wrapper.addEventListener('mouseleave', () => {
+                const photo = wrapper.querySelector('.member-photo');
+                photo.style.transform = `scale(1) rotateX(0) rotateY(0)`;
+                setTimeout(() => { photo.style.transition = 'bottom 0.6s ease, transform 0.6s ease'; }, 100);
+            });
+
+            wrapper.addEventListener('mouseenter', () => {
+                const photo = wrapper.querySelector('.member-photo');
+                photo.style.transition = 'bottom 0.6s ease, transform 0.1s linear';
+            });
+        });
+
+        // 2. Efeito JS Ícone Flutuante (4 segundos)
+        document.querySelectorAll('.member-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                if (this.querySelector('.floating-icon')) return;
+
+                const iconClass = this.getAttribute('data-icon');
+                
+                if (iconClass) {
+                    const iconElement = document.createElement('i');
+                    iconElement.className = `fa-solid ${iconClass} floating-icon`; 
+                    
+                    this.appendChild(iconElement);
+
+                    setTimeout(() => {
+                        if(iconElement.parentNode) {
+                            iconElement.parentNode.removeChild(iconElement);
+                        }
+                    }, 4000); 
+                }
+            });
+        });
+    </script>
+</body>
+</html>
