@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análise Subjetiva PJ - Visita Gerencial</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --sicoob-turquesa: #00AE9D;
+            --sicoob-verde-medio: #7DB61C;
+            --sicoob-verde-claro: #C9D200;
+            --sicoob-verde-escuro: #003641;
+            --sicoob-roxo: #49479D;
+            --bg-light: #f4f7f6;
+        }
+
+        body { font-family: 'Montserrat', sans-serif; background-color: var(--bg-light); color: #333; margin: 0; padding: 0; }
+        
+        .portal-header { background-color: #fff; padding: 1.5rem 2rem; display: flex; align-items: center; gap: 1.5rem; border-bottom: 4px solid var(--sicoob-verde-medio); }
+        .portal-header img.logo { height: 45px; object-fit: contain; }
+        .portal-header h1 { margin: 0; color: var(--sicoob-verde-escuro); font-size: 1.6rem; font-weight: 700; }
+
+        .main-container { display: flex; gap: 2rem; max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        
+        .form-section { width: 55%; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .result-section { width: 45%; background: #fff; padding: 2rem; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border-top: 6px solid var(--sicoob-verde-escuro); position: sticky; top: 2rem; height: 80vh; display: flex; flex-direction: column; }
+
+        h2 { color: var(--sicoob-verde-escuro); font-size: 1.4rem; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-top: 0; }
+        
+        .disclaimer-text {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid var(--sicoob-turquesa);
+            font-style: italic;
+        }
+
+        .form-group { border-left: 5px solid var(--sicoob-verde-medio); padding: 1.5rem; margin-bottom: 1.5rem; background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; }
+        .group-title { font-weight: 700; color: var(--sicoob-verde-escuro); margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+
+        .friendly-tip { font-size: 0.85rem; color: var(--sicoob-roxo); margin-bottom: 1.2rem; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4; background: rgba(73, 71, 157, 0.05); padding: 10px; border-radius: 6px; }
+
+        .question-block { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px dashed #eee; }
+        .question-block:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+        label.main-label { display: block; font-weight: 600; margin-bottom: 0.4rem; color: #444; font-size: 0.9rem; }
+        input[type="text"], select { width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; margin-bottom: 0.5rem; font-family: 'Montserrat', sans-serif; background-color: #fafafa; transition: 0.3s; }
+        
+        .empresa-input { font-size: 1.1rem !important; font-weight: bold; border-color: var(--sicoob-verde-escuro) !important; color: var(--sicoob-verde-escuro); }
+
+        /* Checkboxes Multipla Escolha */
+        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fafafa; padding: 1rem; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 0.5rem; }
+        .checkbox-group label { font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 8px; cursor: pointer; color: #444; }
+        .checkbox-group input[type="checkbox"] { accent-color: var(--sicoob-turquesa); width: 16px; height: 16px; cursor: pointer; }
+
+        .checkbox-wrapper { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #666; cursor: pointer; margin-top: 5px; }
+        .checkbox-wrapper input[type="checkbox"] { accent-color: var(--sicoob-roxo); width: 16px; height: 16px; cursor: pointer; }
+
+        input:disabled, select:disabled { background-color: #e9ecef; color: #888; cursor: not-allowed; border-color: #ddd; }
+        input:focus, select:focus { outline: none; border-color: var(--sicoob-turquesa); box-shadow: 0 0 5px rgba(0, 174, 157, 0.3); background-color: #fff; }
+
+        textarea { width: 100%; flex-grow: 1; padding: 1rem; border: 1px solid #ddd; border-radius: 8px; resize: none; background: #f9fbfb; font-family: 'Montserrat', sans-serif; line-height: 1.6;}
+        
+        /* Botões */
+        .action-buttons { display: flex; gap: 10px; margin-top: 1rem; flex-wrap: wrap; }
+        .btn-acao { flex: 1; color: #fff; border: none; padding: 1rem; border-radius: 8px; cursor: pointer; font-weight: bold; font-family: 'Montserrat', sans-serif; display: flex; justify-content: center; align-items: center; gap: 8px; font-size: 0.9rem; min-width: 150px; }
+        
+        .btn-copiar { background-color: var(--sicoob-verde-escuro); }
+        .btn-imprimir { background-color: var(--sicoob-roxo); }
+        .btn-imprimir-form { background-color: var(--sicoob-turquesa); }
+
+        .btn-dicionario { background-color: var(--sicoob-turquesa); color: #fff; border: none; padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 4px; cursor: pointer; }
+
+        /* POP-UP */
+        .popup-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 2000; justify-content: center; align-items: center; }
+        .popup-content { background: #fff; padding: 3rem; border-radius: 16px; text-align: center; max-width: 600px; box-shadow: 0 15px 40px rgba(0,0,0,0.3); border-bottom: 8px solid var(--sicoob-verde-medio); animation: popupIn 0.4s ease-out; }
+        .popup-content i { font-size: 4rem; color: var(--sicoob-verde-medio); margin-bottom: 1rem; }
+        .popup-content h3 { font-size: 1.8rem; color: var(--sicoob-verde-escuro); margin: 0; line-height: 1.4; }
+        @keyframes popupIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* MODAL DICIONÁRIO */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; padding: 2rem; border-radius: 12px; width: 90%; max-width: 600px; border-top: 6px solid var(--sicoob-turquesa); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid #eee; padding-bottom: 1rem; }
+        .modal-header h3 { margin: 0; color: var(--sicoob-verde-escuro); }
+        .btn-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #888; }
+        .modal-body ul { list-style: none; padding: 0; margin: 0; }
+        .modal-body li { margin-bottom: 1.2rem; font-size: 0.95rem; line-height: 1.5; color: #444; }
+        .modal-body strong { color: var(--sicoob-roxo); font-size: 1rem; display: block; margin-bottom: 0.2rem;}
+
+        /* ESTRUTURA OCULTA P/ IMPRESSÃO DE RELATÓRIO */
+        #print-area { display: none; }
+
+        /* REGRAS DE IMPRESSÃO GERAIS E DINÂMICAS */
+        @media print {
+            @page { margin: 1.5cm; }
+            
+            /* --- REGRA 1: IMPRESSÃO DO RELATÓRIO PREENCHIDO --- */
+            body.print-report .portal-header,
+            body.print-report .main-container { display: none !important; }
+            
+            body.print-report { background: #fff; }
+            body.print-report #print-area { 
+                display: block !important; 
+                width: 100%; 
+                position: static; 
+                margin: 0; 
+                padding: 0; 
+            }
+            body.print-report .print-header { display: flex; align-items: center; border-bottom: 2px solid var(--sicoob-verde-escuro); padding-bottom: 1rem; margin-bottom: 2rem; gap: 20px; }
+            body.print-report .print-header img { height: 50px; }
+            body.print-report .print-header h1 { margin: 0; color: var(--sicoob-verde-escuro); font-size: 1.5rem; text-transform: uppercase; }
+            
+            body.print-report .print-body { 
+                font-size: 11pt; 
+                line-height: 1.6; 
+                color: #000; 
+                text-align: justify; 
+                white-space: pre-wrap; 
+                word-wrap: break-word;
+                overflow-wrap: break-word; 
+            }
+            body.print-report .print-footer { margin-top: 50px; text-align: center; border-top: 1px solid #ccc; padding-top: 15px; font-size: 9pt; color: #666; font-style: italic; }
+
+
+            /* --- REGRA 2: IMPRESSÃO DO FORMULÁRIO EM BRANCO --- */
+            body.print-form { background: #fff; }
+            body.print-form .result-section { display: none !important; }
+            body.print-form .form-section { width: 100% !important; padding: 0 !important; box-shadow: none !important; margin: 0 !important; max-height: none !important; overflow: visible !important; }
+            
+            body.print-form .portal-header { box-shadow: none; padding: 0 0 1rem 0; border-bottom: 2px solid var(--sicoob-verde-escuro); margin-bottom: 1rem; }
+            body.print-form .disclaimer-text { display: none !important; }
+            
+            body.print-form .friendly-tip,
+            body.print-form .btn-dicionario,
+            body.print-form .checkbox-wrapper,
+            body.print-form .action-buttons { display: none !important; }
+
+            body.print-form input[type="text"], 
+            body.print-form select { 
+                border: none !important; 
+                border-bottom: 1px solid #666 !important; 
+                border-radius: 0 !important; 
+                background: transparent !important; 
+                color: transparent !important;
+                box-shadow: none !important;
+                margin-bottom: 1rem;
+            }
+            
+            body.print-form .form-group { 
+                border: 1px solid #ccc !important; 
+                page-break-inside: avoid; 
+                box-shadow: none !important; 
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="portal-header">
+    <img src="images/sicoob.png" alt="Sicoob" class="logo" onerror="this.style.display='none'">
+    <h1>Parecer De Estudo PJ: Fatores Subjetivos</h1>
+</header>
+
+<main class="main-container">
+    <section class="form-section">
+        
+        <p class="disclaimer-text">
+            <i class="fa-solid fa-circle-info"></i> Esta ferramenta foi criada para apoiar você na estruturação dos fatores subjetivos da sua proposta de crédito PJ. Lembre-se de complementar seu parecer com os dados objetivos e indicadores diretamente no sistema. A responsabilidade final pelo estudo e submissão da operação permanece com o técnico responsável.
+        </p>
+
+        <!-- NOME DA EMPRESA -->
+        <div class="question-block" style="border-bottom: none; margin-bottom: 2rem;">
+            <label class="main-label" style="font-size: 1.1rem; color: var(--sicoob-verde-escuro);">Nome da Empresa:</label>
+            <input type="text" id="q_nome_empresa" class="empresa-input" placeholder="Razão Social ou Nome Fantasia" oninput="gerarParecer()">
+        </div>
+
+        <!-- 1. Identificação e Atividade -->
+        <div class="form-group" style="border-left-color: var(--sicoob-verde-medio);">
+            <div class="group-title">1. Identificação e Atividade Econômica</div>
+            <div class="question-block">
+                <label class="main-label">1.1. Como é a verdadeira estrutura de poder e liderança da empresa?</label>
+                <input type="text" id="q_lideranca" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_lideranca" onchange="toggleInput('q_lideranca', this.checked)"> Não possuo essa informação</label>
+            </div>
+            <div class="question-block">
+                <label class="main-label">1.2. Qual a realidade da estrutura de atuação (porte, filiais, grupo econômico)?</label>
+                <input type="text" id="q_estrutura" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_estrutura" onchange="toggleInput('q_estrutura', this.checked)"> Não possuo essa informação</label>
+            </div>
+        </div>
+
+        <!-- 2. Situação Mercadológica e Operacional -->
+        <div class="form-group" style="border-left-color: var(--sicoob-roxo);">
+            <div class="group-title">
+                2. Situação Mercadológica e Operacional
+                <button class="btn-dicionario" onclick="abrirModal()"><i class="fa-solid fa-book"></i> Ver Indicadores</button>
+            </div>
+            <div class="question-block">
+                <label class="main-label">2.1. Qual o posicionamento da empresa frente à concorrência e dependência de clientes?</label>
+                <input type="text" id="q_mercado" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_mercado" onchange="toggleInput('q_mercado', this.checked)"> Não possuo essa informação</label>
+            </div>
+            <div class="question-block">
+                <label class="main-label">2.2. Como o ciclo operacional afeta o caixa (prazos de compra, venda e estoque)?</label>
+                <input type="text" id="q_operacao" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_operacao" onchange="toggleInput('q_operacao', this.checked)"> Não possuo essa informação</label>
+            </div>
+            <div class="question-block">
+                <label class="main-label">2.3. Quais as perspectivas futuras de inovação e qual o potencial desta operação em gerar novas divisas de recursos?</label>
+                <input type="text" id="q_futuro" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_futuro" onchange="toggleInput('q_futuro', this.checked)"> Não possuo essa informação</label>
+            </div>
+        </div>
+
+        <!-- 3. Situação Financeira e Reciprocidade -->
+        <div class="form-group" style="border-left-color: var(--sicoob-turquesa);">
+            <div class="group-title">3. Situação Financeira e Reciprocidade</div>
+            <div class="question-block">
+                <label class="main-label">3.1. Como está o real endividamento e pontualidade (Bacen + Operacional)?</label>
+                <input type="text" id="q_endividamento" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_endividamento" onchange="toggleInput('q_endividamento', this.checked)"> Não possuo essa informação</label>
+            </div>
+            <div class="question-block">
+                <label class="main-label">3.2. Qual o grau de fidelidade e potencial de novos negócios (Portfólio)?</label>
+                <input type="text" id="q_portfolio" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_portfolio" onchange="toggleInput('q_portfolio', this.checked)"> Não possuo essa informação</label>
+            </div>
+            <div class="question-block">
+                <label class="main-label">3.3. Como é a movimentação atual na conta corrente e qual a expectativa de incremento com esta operação?</label>
+                <input type="text" id="q_movimentacao" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_movimentacao" onchange="toggleInput('q_movimentacao', this.checked)"> Não possuo essa informação</label>
+            </div>
+        </div>
+
+        <!-- 4. Documentação e Garantias Reais -->
+        <div class="form-group" style="border-left-color: var(--sicoob-verde-claro);">
+            <div class="group-title">4. Documentação e Garantias Reais</div>
+
+            <div class="question-block" style="background: rgba(125, 182, 28, 0.05); padding: 10px; border-radius: 6px; border-left: 4px solid var(--sicoob-verde-medio);">
+                <label class="main-label">4.1. Você conferiu se as documentações das fases anteriores (Documentação e Garantias) estão corretas e anexadas?</label>
+                <select id="q_doc_conferencia" onchange="verificarPopUpDoc()">
+                    <option value="">Selecione...</option>
+                    <option value="Confirmo que as documentações das fases anteriores (Documentação e validação de Garantias) foram devidamente conferidas e encontram-se em plena conformidade no sistema.">Sim, conferi e validei a conformidade.</option>
+                    <option value="A documentação das fases anteriores foi conferida, porém apresenta pendências que estão sendo tratadas e regularizadas.">Conferi, mas existem pendências.</option>
+                </select>
+            </div>
+
+            <div class="question-block">
+                <label class="main-label">4.2. Quais os tipos de garantias irão possuir a operação?</label>
+                <div class="checkbox-group">
+                    <label style="font-weight: bold;"><input type="checkbox" name="garantia" value="NÃO POSSUI GARANTIA" onchange="avaliarGarantias()"> NÃO POSSUI GARANTIA</label>
+                    <label><input type="checkbox" name="garantia" value="CESSÃO DE DIREITOS CRED" onchange="avaliarGarantias()"> CESSÃO DE DIREITOS CRED</label>
+                    <label><input type="checkbox" name="garantia" value="HIPOTECA" onchange="avaliarGarantias()"> HIPOTECA</label>
+                    <label><input type="checkbox" name="garantia" value="ALIENAÇÃO FIDUCIÁRIA" onchange="avaliarGarantias()"> ALIENAÇÃO FIDUCIÁRIA</label>
+                    <label><input type="checkbox" name="garantia" value="GARANTIA FIDEJUSSÓRIA" onchange="avaliarGarantias()"> GARANTIA FIDEJUSSÓRIA</label>
+                    <label><input type="checkbox" name="garantia" value="PENHOR" onchange="avaliarGarantias()"> PENHOR</label>
+                    <label><input type="checkbox" name="garantia" value="SEGUROS E ASSEMELHADOS" onchange="avaliarGarantias()"> SEGUROS E ASSEMELHADOS</label>
+                    <label><input type="checkbox" name="garantia" value="CAUÇÃO" onchange="avaliarGarantias()"> CAUÇÃO</label>
+                </div>
+            </div>
+            
+            <div class="question-block" id="div_garantia_fisica" style="display: none; background: rgba(0, 174, 157, 0.05); padding: 10px; border-radius: 6px;">
+                <label class="main-label" style="color: var(--sicoob-turquesa);">4.3. Qual a sua percepção sobre a conservação e liquidez do bem ofertado?</label>
+                <input type="text" id="q_garantia_fisica" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_fisica" onchange="toggleInput('q_garantia_fisica', this.checked)"> Não possuo essa informação</label>
+            </div>
+
+            <div class="question-block">
+                <label class="main-label" id="lbl_pessoas">4.3. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?</label>
+                <input type="text" id="q_garantia_pessoas" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_pessoas" onchange="toggleInput('q_garantia_pessoas', this.checked)"> Não possuo essa informação</label>
+            </div>
+
+            <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <label class="main-label" id="lbl_legal">4.4. Qual a percepção sobre regularidade documental e risco ambiental?</label>
+                <input type="text" id="q_garantia_legal" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_legal" onchange="toggleInput('q_garantia_legal', this.checked)"> Não possuo essa informação</label>
+            </div>
+        </div>
+
+        <!-- 5. Considerações Finais -->
+        <div class="form-group" style="border-left-color: var(--sicoob-verde-escuro); margin-bottom: 0;">
+            <div class="group-title">5. Considerações Finais</div>
+            <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <label class="main-label">5.1. Existe algum outro fator (positivo ou negativo) que gostaria de elucidar e que merece destaque?</label>
+                <input type="text" id="q_extra" oninput="gerarParecer()">
+                <label class="checkbox-wrapper"><input type="checkbox" id="chk_extra" onchange="toggleInput('q_extra', this.checked)"> Não possuo essa informação</label>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- LADO DIREITO -->
+    <section class="result-section">
+        <h2>Relatório de Visão Gerencial</h2>
+        <textarea id="texto_gerado" readonly></textarea>
+        
+        <div class="action-buttons">
+            <button class="btn-acao btn-copiar" onclick="copiarParecer()">
+                <i class="fa-regular fa-copy"></i> Copiar
+            </button>
+            <button class="btn-acao btn-imprimir" onclick="imprimirRelatorio()">
+                <i class="fa-solid fa-print"></i> Relatório
+            </button>
+            <button class="btn-acao btn-imprimir-form" onclick="imprimirFormulario()">
+                <i class="fa-solid fa-file-lines"></i> Formulário
+            </button>
+        </div>
+    </section>
+</main>
+
+<!-- POP-UP 4 SEGUNDOS -->
+<div class="popup-overlay" id="popupDoc">
+    <div class="popup-content">
+        <i class="fa-solid fa-file-circle-check"></i>
+        <h3>As documentações atualizadas e completas auxiliam na agilidade da esteira de crédito</h3>
+    </div>
+</div>
+
+<!-- ÁREA DE IMPRESSÃO (Oculta na Web) -->
+<div id="print-area">
+    <div class="print-header">
+        <img src="images/sicoob.png" alt="Sicoob">
+        <h1>Relatório de Visão Gerencial - Análise de Crédito</h1>
+    </div>
+    <div class="print-body" id="print-content"></div>
+    <div class="print-footer">
+        <strong>Aviso:</strong> Esta ferramenta foi criada para apoiar a estruturação dos fatores subjetivos da proposta. A inserção dos dados objetivos e a responsabilidade final pelo estudo e análise permanecem com o técnico responsável.<br><br>
+        Gerado via Portal De Crédito -  Uso Interno 
+    </div>
+</div>
+
+<!-- MODAL: Dicionário de Indicadores -->
+<div class="modal-overlay" id="modalDicionario">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fa-solid fa-book-open"></i> Dicionário de Indicadores</h3>
+            <button class="btn-close" onclick="fecharModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <ul>
+                <li><strong>NCG:</strong> Necessidade de Capital de Giro.</li>
+                <li><strong>PMRE:</strong> Prazo Médio de Renovação de Estoques.</li>
+                <li><strong>PMRV:</strong> Prazo Médio de Recebimento das Vendas.</li>
+                <li><strong>PMPC:</strong> Prazo Médio de Pagamento de Compras.</li>
+                <li><strong>Ciclo Operacional:</strong> Tempo total para concluir o ciclo produtivo (PMRE + PMRV).</li>
+                <li><strong>Ciclo Financeiro:</strong> Tempo em que a empresa precisa de dinheiro extra para cobrir a operação (CO - PMPC).</li>
+                <li><strong>Efeito Tesoura:</strong> Quando a NCG cresce mais rápido que o capital, asfixiando a tesouraria.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleInput(inputId, isChecked) {
+        const inputElement = document.getElementById(inputId);
+        inputElement.disabled = isChecked;
+        if(isChecked) { inputElement.value = ""; }
+        gerarParecer();
+    }
+
+    // Modal Dicionário
+    function abrirModal() { document.getElementById('modalDicionario').style.display = 'flex'; }
+    function fecharModal() { document.getElementById('modalDicionario').style.display = 'none'; }
+    window.onclick = function(e) {
+        const mod = document.getElementById('modalDicionario');
+        if (e.target == mod) fecharModal();
+    }
+
+    // Pop-Up de Conferência Documental
+    function verificarPopUpDoc() {
+        const selectDoc = document.getElementById('q_doc_conferencia').value;
+        if(selectDoc.includes("Confirmo")) {
+            const popup = document.getElementById('popupDoc');
+            popup.style.display = 'flex';
+            setTimeout(() => { popup.style.display = 'none'; }, 4000);
+        }
+        gerarParecer();
+    }
+
+    // Condicional de Garantias
+    function avaliarGarantias() {
+        const checkboxes = document.querySelectorAll('input[name="garantia"]:checked');
+        let mostrarFisica = false;
+        
+        checkboxes.forEach((cb) => {
+            if (["CESSÃO DE DIREITOS CRED", "HIPOTECA", "ALIENAÇÃO FIDUCIÁRIA", "PENHOR", "CAUÇÃO"].includes(cb.value)) {
+                mostrarFisica = true;
+            }
+        });
+
+        const divFisica = document.getElementById('div_garantia_fisica');
+        const lblPessoas = document.getElementById('lbl_pessoas');
+        const lblLegal = document.getElementById('lbl_legal');
+
+        if (mostrarFisica) {
+            divFisica.style.display = 'block';
+            lblPessoas.innerText = "4.4. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?";
+            lblLegal.innerText = "4.5. Qual a percepção sobre regularidade documental e risco ambiental?";
+        } else {
+            divFisica.style.display = 'none';
+            document.getElementById('q_garantia_fisica').value = "";
+            document.getElementById('chk_garantia_fisica').checked = false;
+            document.getElementById('q_garantia_fisica').disabled = false;
+            
+            lblPessoas.innerText = "4.3. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?";
+            lblLegal.innerText = "4.4. Qual a percepção sobre regularidade documental e risco ambiental?";
+        }
+        gerarParecer();
+    }
+
+    function gerarParecer() {
+        let parecer = "";
+        
+        // EMPRESA
+        const nomeEmpresa = document.getElementById('q_nome_empresa').value.trim();
+        if (nomeEmpresa) {
+            parecer += "EMPRESA / COOPERADO: " + nomeEmpresa.toUpperCase() + "\n\n";
+        }
+
+        // BLOCO 1
+        const lideranca = document.getElementById('q_lideranca').value.trim();
+        const estrutura = document.getElementById('q_estrutura').value.trim();
+        if (lideranca || estrutura || document.getElementById('chk_lideranca').checked || document.getElementById('chk_estrutura').checked) {
+            parecer += "1. IDENTIFICAÇÃO E ATIVIDADE ECONÔMICA\n";
+            parecer += document.getElementById('chk_lideranca').checked ? "- [Info Indisponível] Estrutura de poder e liderança.\n" : (lideranca ? `A liderança e estrutura de poder demonstra que ${lideranca}. ` : "");
+            parecer += document.getElementById('chk_estrutura').checked ? "- [Info Indisponível] Realidade da estrutura de atuação.\n" : (estrutura ? `A realidade estrutural do negócio indica que: ${estrutura}.` : "");
+            parecer += "\n\n";
+        }
+
+        // BLOCO 2
+        const mercado = document.getElementById('q_mercado').value.trim();
+        const operacao = document.getElementById('q_operacao').value.trim();
+        const futuro = document.getElementById('q_futuro').value.trim();
+        if (mercado || operacao || futuro || document.getElementById('chk_mercado').checked || document.getElementById('chk_operacao').checked || document.getElementById('chk_futuro').checked) {
+            parecer += "2. SITUAÇÃO MERCADOLÓGICA E OPERACIONAL\n";
+            parecer += document.getElementById('chk_mercado').checked ? "- [Info Indisponível] Posicionamento frente à concorrência.\n" : (mercado ? `Frente ao mercado, a empresa possui ${mercado}. ` : "");
+            parecer += document.getElementById('chk_operacao').checked ? "- [Info Indisponível] Ciclo operacional e caixa.\n" : (operacao ? `Operacionalmente, o ciclo atua da seguinte forma: ${operacao}. ` : "");
+            parecer += document.getElementById('chk_futuro').checked ? "- [Info Indisponível] Perspectivas de inovação e divisas.\n" : (futuro ? `Quanto a projetos futuros, há potencial de ${futuro}.` : "");
+            parecer += "\n\n";
+        }
+
+        // BLOCO 3
+        const endividamento = document.getElementById('q_endividamento').value.trim();
+        const portfolio = document.getElementById('q_portfolio').value.trim();
+        const movimentacao = document.getElementById('q_movimentacao').value.trim();
+        if (endividamento || portfolio || movimentacao || document.getElementById('chk_endividamento').checked || document.getElementById('chk_portfolio').checked || document.getElementById('chk_movimentacao').checked) {
+            parecer += "3. SITUAÇÃO FINANCEIRA E RECIPROCIDADE\n";
+            parecer += document.getElementById('chk_endividamento').checked ? "- [Info Indisponível] Endividamento e pontualidade.\n" : (endividamento ? `Avaliando o endividamento geral, observa-se que ${endividamento}. ` : "");
+            parecer += document.getElementById('chk_portfolio').checked ? "- [Info Indisponível] Grau de fidelidade e portfólio.\n" : (portfolio ? `No tocante à fidelidade institucional, o cooperado apresenta ${portfolio}. ` : "");
+            parecer += document.getElementById('chk_movimentacao').checked ? "- [Info Indisponível] Movimentação em conta corrente.\n" : (movimentacao ? `Sobre a movimentação na conta corrente, nota-se que ${movimentacao}.` : "");
+            parecer += "\n\n";
+        }
+
+        // BLOCO 4
+        const docConf = document.getElementById('q_doc_conferencia').value;
+        const boxesGarantia = Array.from(document.querySelectorAll('input[name="garantia"]:checked')).map(cb => cb.value);
+        const garFisica = document.getElementById('q_garantia_fisica').value.trim();
+        const garPessoas = document.getElementById('q_garantia_pessoas').value.trim();
+        const garLegal = document.getElementById('q_garantia_legal').value.trim();
+        
+        if (docConf || boxesGarantia.length > 0 || garFisica || garPessoas || garLegal || document.getElementById('chk_garantia_fisica').checked || document.getElementById('chk_garantia_pessoas').checked || document.getElementById('chk_garantia_legal').checked) {
+            parecer += "4. DOCUMENTAÇÃO E GARANTIAS REAIS\n";
+            
+            if (docConf) {
+                parecer += docConf + "\n";
+            } else {
+                parecer += "- [Atenção / Risco de Esteira] A validação e conferência das documentações das fases anteriores NÃO foi atestada pelo responsável neste ato.\n";
+            }
+
+            if (boxesGarantia.length > 0) {
+                parecer += `Garantias vinculadas à operação: ${boxesGarantia.join(", ")}. `;
+            }
+
+            if (document.getElementById('div_garantia_fisica').style.display === 'block') {
+                parecer += document.getElementById('chk_garantia_fisica').checked ? "\n- [Info Indisponível] Percepção física e liquidez do bem." : (garFisica ? `Em vistoria física, atesta-se que ${garFisica}. ` : "");
+            }
+
+            parecer += document.getElementById('chk_garantia_pessoas').checked ? "\n- [Info Indisponível] Apontamentos críticos nas pessoas." : (garPessoas ? `Analisando o quadro de pessoas envolvidas, ${garPessoas}. ` : "");
+            parecer += document.getElementById('chk_garantia_legal').checked ? "\n- [Info Indisponível] Regularidade documental/ambiental." : (garLegal ? `Legal e ambientalmente, o cooperado ${garLegal}.` : "");
+            parecer += "\n\n";
+        }
+
+        // BLOCO 5
+        const extra = document.getElementById('q_extra').value.trim();
+        if (extra || document.getElementById('chk_extra').checked) {
+            parecer += "5. CONSIDERAÇÕES FINAIS\n";
+            parecer += document.getElementById('chk_extra').checked ? "Sem fatores extras" : (extra ? `Adicionalmente, cumpre destacar que ${extra}.` : "");
+        }
+
+        document.getElementById('texto_gerado').value = parecer.trim();
+    }
+
+    function copiarParecer() {
+        const textarea = document.getElementById('texto_gerado');
+        if(textarea.value.trim() === "") return;
+        textarea.select();
+        document.execCommand('copy');
+        
+        const btn = document.querySelector('.btn-copiar');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i> Copiado!';
+        setTimeout(() => { btn.innerHTML = '<i class="fa-regular fa-copy"></i> Copiar'; }, 3000);
+    }
+
+    // Controle de Classes para Impressão Dupla
+    function imprimirRelatorio() {
+        const texto = document.getElementById('texto_gerado').value.trim();
+        if(texto === "") { alert("Gere o relatório antes de imprimir."); return; }
+        
+        document.getElementById('print-content').innerHTML = texto.replace(/\n/g, '<br>');
+        
+        document.body.classList.add('print-report');
+        window.print();
+        setTimeout(() => document.body.classList.remove('print-report'), 500);
+    }
+
+    function imprimirFormulario() {
+        document.body.classList.add('print-form');
+        window.print();
+        setTimeout(() => document.body.classList.remove('print-form'), 500);
+    }
+</script>
+</body>
+</html>
