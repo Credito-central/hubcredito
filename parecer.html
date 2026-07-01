@@ -481,7 +481,7 @@
             }
 
             if (document.getElementById('div_garantia_fisica').style.display === 'block') {
-                parecer += document.getElementById('chk_garantia_fisica').checked ? "\n- [Info Indisponível] Percepção física e liquidez do bem." : (garFisica ? `Em vistoria física, atesta-se que ${garFisica}. ` : "");
+                parecer += document.getElementById('chk_garantia_fisica').checked ? "\n- [Info Indisponível] Percepção física e liquidez do bem." : (garFisica ? `Em análise da garantia, atesta-se que ${garFisica}. ` : "");
             }
 
             parecer += document.getElementById('chk_garantia_pessoas').checked ? "\n- [Info Indisponível] Apontamentos críticos nas pessoas." : (garPessoas ? `Analisando o quadro de pessoas envolvidas, ${garPessoas}. ` : "");
