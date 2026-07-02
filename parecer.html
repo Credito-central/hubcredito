@@ -274,7 +274,7 @@
             </div>
 
             <div class="question-block">
-                <label class="main-label" id="lbl_pessoas">4.3. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?</label>
+                <label class="main-label" id="lbl_pessoas">4.3. Existem apontamentos críticos nos participantes da operação? (avalistas, cônjuges, estado civil)?</label>
                 <input type="text" id="q_garantia_pessoas" oninput="gerarParecer()">
                 <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_pessoas" onchange="toggleInput('q_garantia_pessoas', this.checked)"> Não possuo essa informação</label>
             </div>
@@ -482,7 +482,7 @@
                 parecer += document.getElementById('chk_garantia_fisica').checked ? "\n- [Info Indisponível] Percepção física e liquidez do bem." : (garFisica ? `Em relação ao bem ofertado, atesta-se que ${garFisica}. ` : "");
             }
 
-            parecer += document.getElementById('chk_garantia_pessoas').checked ? "\n- [Info Indisponível] Apontamentos críticos nas pessoas." : (garPessoas ? `Analisando o quadro de pessoas envolvidas, ${garPessoas}. ` : "");
+            parecer += document.getElementById('chk_garantia_pessoas').checked ? "\n- [Não foi possível verificar apontamentos dos participantes.] " : (garPessoas ? `Analisando o quadro de pessoas envolvidas, ${garPessoas}. ` : "");
             parecer += document.getElementById('chk_garantia_legal').checked ? "\n- [Info Indisponível] Regularidade documental/ambiental." : (garLegal ? `Legal e ambientalmente, o cooperado ${garLegal}.` : "");
             parecer += "\n\n";
         }
