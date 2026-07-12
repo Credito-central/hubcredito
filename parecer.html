@@ -475,7 +475,7 @@
         // DATA DE HOJE
         const hoje = new Date();
         const dataFormatada = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-        parecer += "Data de hoje: " + dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1) + "\n\n";
+        parecer += "Data do relatório: " + dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1) + "\n\n";
         
         // EMPRESA
         const nomeEmpresa = document.getElementById('q_nome_empresa').value.trim();
