@@ -235,6 +235,53 @@
     background: rgba(255,255,255,0.35);
   }
 
+  /* ===================== BLOCO DE INDICADORES MACROECONÔMICOS =====================
+     Fica encostado à direita do banner (margin-left:auto). Dados vêm em tempo
+     real da API pública do Banco Central (SGS). Ver script no fim do arquivo.
+     =================================================================================== */
+  .macro-indicators{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    margin-left: auto;
+    padding-left: 20px;
+    border-left: 1px solid rgba(255,255,255,0.35);
+    flex-shrink: 0;
+  }
+
+  .macro-item{
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 8px;
+    padding: 5px 12px;
+    min-width: 68px;
+    line-height: 1.2;
+  }
+
+  .macro-item .macro-label{
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--green);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+
+  .macro-item .macro-value{
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--white);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 1200px){
+    .macro-indicators{ margin-left: 0; padding-left: 0; border-left: none; }
+  }
+
   @media (max-width: 900px){
     .banner{ flex-wrap: wrap; gap: 14px; }
     .team-row{ gap: 16px; }
@@ -264,6 +311,24 @@
 
   <div class="team-row" id="teamRow">
     <!-- Os blocos de área e os cards são gerados automaticamente pelo JavaScript abaixo -->
+  </div>
+
+  <!-- ===================== INDICADORES MACROECONÔMICOS (BANCO CENTRAL) =====================
+       Valores atualizados automaticamente ao carregar a página, via API pública do Bacen.
+       ========================================================================================= -->
+  <div class="macro-indicators" id="macroIndicators">
+    <div class="macro-item" title="Meta Selic definida pelo Copom - Fonte: Banco Central (SGS)">
+      <span class="macro-label">Selic Meta</span>
+      <span class="macro-value" id="macroSelicValor">--</span>
+    </div>
+    <div class="macro-item" title="IPCA acumulado em 12 meses - Fonte: Banco Central (SGS)">
+      <span class="macro-label">IPCA 12M</span>
+      <span class="macro-value" id="macroIpcaValor">--</span>
+    </div>
+    <div class="macro-item" title="Dólar americano (PTAX venda) - Fonte: Banco Central (SGS)">
+      <span class="macro-label">Câmbio</span>
+      <span class="macro-value" id="macroCambioValor">--</span>
+    </div>
   </div>
 </div>
 
@@ -389,6 +454,45 @@
   blocoConsultoria.innerHTML = `<div class="area-title">${estrutura.consultoria.titulo}</div>`;
   blocoConsultoria.appendChild(criarFileiraMembros(estrutura.consultoria.membros));
   teamRow.appendChild(blocoConsultoria);
+
+  /* =====================================================================
+     >>> INDICADORES MACROECONÔMICOS (BANCO CENTRAL DO BRASIL) <<<
+     Consulta a API pública do SGS (Sistema Gerenciador de Séries Temporais):
+       - 432   = Meta da taxa Selic definida pelo Copom (% a.a.)
+       - 13522 = IPCA acumulado em 12 meses (%)
+       - 1     = Dólar americano - PTAX venda (R$)
+     Não requer chave de API. Se a consulta falhar (ex.: sem internet, CORS
+     bloqueado por alguma rede corporativa), os campos mostram "--".
+     ===================================================================== */
+  async function buscarSerieSGS(codigo) {
+    const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados/ultimos/1?formato=json`;
+    const resp = await fetch(url);
+    if (!resp.ok) throw new Error(`SGS ${codigo}: HTTP ${resp.status}`);
+    const dados = await resp.json();
+    if (!dados || !dados.length) throw new Error(`SGS ${codigo}: sem dados`);
+    return dados[0]; // { data: "dd/mm/aaaa", valor: "13,25" }
+  }
+
+  async function atualizarIndicadoresMacro() {
+    try {
+      const [selic, ipca, dolar] = await Promise.all([
+        buscarSerieSGS(432),
+        buscarSerieSGS(13522),
+        buscarSerieSGS(1)
+      ]);
+
+      document.getElementById('macroSelicValor').textContent = selic.valor.replace('.', ',') + '%';
+      document.getElementById('macroIpcaValor').textContent = ipca.valor.replace('.', ',') + '%';
+      document.getElementById('macroCambioValor').textContent = 'R$ ' + Number(dolar.valor).toFixed(2).replace('.', ',');
+    } catch (e) {
+      console.error('Erro ao buscar indicadores do Banco Central:', e);
+      ['macroSelicValor', 'macroIpcaValor', 'macroCambioValor'].forEach(id => {
+        document.getElementById(id).textContent = '--';
+      });
+    }
+  }
+
+  atualizarIndicadoresMacro();
 </script>
 
 </body>
