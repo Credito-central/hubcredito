@@ -28,10 +28,10 @@
   .banner{
     width: 100%;
     background: linear-gradient(90deg, var(--teal-dark), var(--teal));
-    padding: 10px clamp(10px, 1.5vw, 24px);
+    padding: 12px 24px;
     display:flex;
     align-items:center;
-    gap: clamp(10px, 1.6vw, 30px);
+    gap: 30px;
     position: relative;
   }
 
@@ -41,7 +41,7 @@
     align-items:center;
     gap: 8px;
     color: var(--white);
-    font-size: clamp(13px, 1.1vw, 20px);
+    font-size: 20px;
     font-weight: 900;
     text-decoration: none;
     letter-spacing: 0.3px;
@@ -49,7 +49,7 @@
     -webkit-text-stroke: 0.6px var(--teal-dark);
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(255,255,255,0.4);
-    padding: clamp(5px, 0.6vw, 8px) clamp(10px, 1.2vw, 18px);
+    padding: 8px 18px;
     border-radius: 8px;
     transition: background 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
     cursor: pointer;
@@ -90,11 +90,9 @@
   .team-row{
     display:flex;
     align-items:center;
-    gap: clamp(10px, 1.6vw, 26px);
-    flex-wrap: nowrap;
-    overflow: hidden;
-    min-width: 0;
-    flex: 1 1 auto;
+    gap: 26px;
+    flex-wrap: wrap;
+    overflow-x: auto;
   }
 
   /* ===================== BLOCO DE RAMIFICAÇÃO (ÁREA) =====================
@@ -106,44 +104,37 @@
   .area-block{
     display:flex;
     align-items:center;
-    gap: clamp(5px, 0.7vw, 10px);
-    flex-shrink: 0;
+    gap: 10px;
   }
 
   .area-title{
     color: var(--green);
-    font-size: clamp(9.5px, 0.8vw, 12px);
+    font-size: 12px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.4px;
     white-space: nowrap;
-  }
-
-  .sub-areas-wrap{
-    display:flex;
-    align-items:center;
-    gap: clamp(8px, 1vw, 18px);
   }
 
   .sub-area{
     display:flex;
     align-items:center;
-    gap: clamp(4px, 0.6vw, 8px);
+    gap: 8px;
   }
 
   .sub-area-label{
-    font-size: clamp(8px, 0.65vw, 10px);
+    font-size: 10px;
     font-weight: 800;
     color: var(--teal-dark);
     background: var(--white);
-    padding: 2px clamp(5px, 0.5vw, 8px);
+    padding: 2px 8px;
     border-radius: 10px;
     white-space: nowrap;
   }
 
   .member-row{
     display:flex;
-    gap: clamp(5px, 0.7vw, 12px);
+    gap: 12px;
   }
 
   /* ===================================================================
@@ -154,8 +145,8 @@
 
   .member{
     position: relative;
-    width: clamp(38px, 3.6vw, 56px);
-    height: clamp(38px, 3.6vw, 56px);
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
     overflow: hidden;
     border: 2px solid var(--white);
@@ -244,55 +235,9 @@
     background: rgba(255,255,255,0.35);
   }
 
-  /* ===================== BLOCO DE INDICADORES MACROECONÔMICOS =====================
-     Empilhado verticalmente e compacto para não espremer o restante do banner
-     (fotos da equipe). Fica encostado à direita (margin-left:auto). Dados vêm
-     em tempo real da API pública do Banco Central (SGS) - ver script no fim.
-     =================================================================================== */
-  .macro-indicators{
-    display:flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 4px;
-    margin-left: auto;
-    padding-left: clamp(8px, 1vw, 14px);
-    border-left: 1px solid rgba(255,255,255,0.35);
-    flex-shrink: 0;
-  }
-
-  .macro-item{
-    display:flex;
-    align-items:center;
-    justify-content: space-between;
-    gap: clamp(6px, 0.8vw, 10px);
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.4);
-    border-radius: 5px;
-    padding: 2px clamp(5px, 0.6vw, 8px);
-    white-space: nowrap;
-  }
-
-  .macro-item .macro-label{
-    font-size: clamp(7.5px, 0.6vw, 8.5px);
-    font-weight: 800;
-    color: var(--green);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-  }
-
-  .macro-item .macro-value{
-    font-size: clamp(10px, 0.8vw, 11.5px);
-    font-weight: 900;
-    color: var(--white);
-  }
-
-  @media (max-width: 1200px){
-    .macro-indicators{ margin-left: 0; padding-left: 0; border-left: none; flex-direction: row; }
-  }
-
   @media (max-width: 900px){
     .banner{ flex-wrap: wrap; gap: 14px; }
-    .team-row{ gap: 16px; flex-wrap: wrap; overflow: visible; }
+    .team-row{ gap: 16px; }
   }
 </style>
 </head>
@@ -319,24 +264,6 @@
 
   <div class="team-row" id="teamRow">
     <!-- Os blocos de área e os cards são gerados automaticamente pelo JavaScript abaixo -->
-  </div>
-
-  <!-- ===================== INDICADORES MACROECONÔMICOS (BANCO CENTRAL) =====================
-       Valores atualizados automaticamente ao carregar a página, via API pública do Bacen.
-       ========================================================================================= -->
-  <div class="macro-indicators" id="macroIndicators">
-    <div class="macro-item" title="Meta Selic definida pelo Copom - Fonte: Banco Central (SGS)">
-      <span class="macro-label">Selic Meta</span>
-      <span class="macro-value" id="macroSelicValor">--</span>
-    </div>
-    <div class="macro-item" title="IPCA acumulado em 12 meses - Fonte: Banco Central (SGS)">
-      <span class="macro-label">IPCA 12M</span>
-      <span class="macro-value" id="macroIpcaValor">--</span>
-    </div>
-    <div class="macro-item" title="Dólar americano (PTAX venda) - Fonte: Banco Central (SGS)">
-      <span class="macro-label">Câmbio</span>
-      <span class="macro-value" id="macroCambioValor">--</span>
-    </div>
   </div>
 </div>
 
@@ -436,7 +363,9 @@
   blocoSuporte.innerHTML = `<div class="area-title">${estrutura.suporteComercial.titulo}</div>`;
 
   const subAreasWrap = document.createElement('div');
-  subAreasWrap.className = 'sub-areas-wrap';
+  subAreasWrap.style.display = 'flex';
+  subAreasWrap.style.alignItems = 'center';
+  subAreasWrap.style.gap = '18px';
 
   Object.values(estrutura.suporteComercial.subAreas).forEach((sub) => {
     const subDiv = document.createElement('div');
@@ -460,45 +389,6 @@
   blocoConsultoria.innerHTML = `<div class="area-title">${estrutura.consultoria.titulo}</div>`;
   blocoConsultoria.appendChild(criarFileiraMembros(estrutura.consultoria.membros));
   teamRow.appendChild(blocoConsultoria);
-
-  /* =====================================================================
-     >>> INDICADORES MACROECONÔMICOS (BANCO CENTRAL DO BRASIL) <<<
-     Consulta a API pública do SGS (Sistema Gerenciador de Séries Temporais):
-       - 432   = Meta da taxa Selic definida pelo Copom (% a.a.)
-       - 13522 = IPCA acumulado em 12 meses (%)
-       - 1     = Dólar americano - PTAX venda (R$)
-     Não requer chave de API. Se a consulta falhar (ex.: sem internet, CORS
-     bloqueado por alguma rede corporativa), os campos mostram "--".
-     ===================================================================== */
-  async function buscarSerieSGS(codigo) {
-    const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados/ultimos/1?formato=json`;
-    const resp = await fetch(url);
-    if (!resp.ok) throw new Error(`SGS ${codigo}: HTTP ${resp.status}`);
-    const dados = await resp.json();
-    if (!dados || !dados.length) throw new Error(`SGS ${codigo}: sem dados`);
-    return dados[0]; // { data: "dd/mm/aaaa", valor: "13,25" }
-  }
-
-  async function atualizarIndicadoresMacro() {
-    try {
-      const [selic, ipca, dolar] = await Promise.all([
-        buscarSerieSGS(432),
-        buscarSerieSGS(13522),
-        buscarSerieSGS(1)
-      ]);
-
-      document.getElementById('macroSelicValor').textContent = selic.valor.replace('.', ',') + '%';
-      document.getElementById('macroIpcaValor').textContent = ipca.valor.replace('.', ',') + '%';
-      document.getElementById('macroCambioValor').textContent = 'R$ ' + Number(dolar.valor).toFixed(2).replace('.', ',');
-    } catch (e) {
-      console.error('Erro ao buscar indicadores do Banco Central:', e);
-      ['macroSelicValor', 'macroIpcaValor', 'macroCambioValor'].forEach(id => {
-        document.getElementById(id).textContent = '--';
-      });
-    }
-  }
-
-  atualizarIndicadoresMacro();
 </script>
 
 </body>
