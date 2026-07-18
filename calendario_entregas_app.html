@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calendário de Entregas — Crédito Central 2016</title>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<style>
+  :root{
+    --bg: #F4F7F7;
+    --panel: #FFFFFF;
+    --ink: #0B2E2C;
+    --ink-soft: #5C7876;
+    --teal: #00AE9D;
+    --teal-deep: #003D3A;
+    --line: #DCE6E5;
+    --realizado: #1E8E6B;
+    --realizado-bg: #E4F5EE;
+    --andamento: #C98A1B;
+    --andamento-bg: #FBF0DC;
+    --pendente: #B23B4E;
+    --pendente-bg: #FAE7EA;
+    --font-display: 'Poppins', 'Segoe UI', sans-serif;
+    --font-body: 'Inter', 'Segoe UI', sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    padding: 32px;
+  }
+
+  .wrap{ max-width: 1180px; margin: 0 auto; }
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .eyebrow{
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-size: 11px;
+    color: var(--teal);
+    font-weight: 700;
+    margin: 0 0 4px 0;
+  }
+
+  h1{
+    font-family: var(--font-display);
+    font-size: 27px;
+    margin: 0;
+    color: var(--teal-deep);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .legend{
+    display:flex;
+    gap: 16px;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .legend span{ display:flex; align-items:center; gap:6px; }
+  .dot{ width:8px; height:8px; border-radius: 2px; display:inline-block; }
+  .dot.realizado{ background: var(--realizado); }
+  .dot.andamento{ background: var(--andamento); }
+  .dot.pendente{ background: var(--pendente); }
+
+  .btn-primary{
+    background: var(--teal-deep);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-primary:hover{ background: var(--teal); }
+
+  .year-switch{
+    display:flex;
+    align-items:center;
+    gap: 10px;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--teal-deep);
+    font-size: 14px;
+  }
+  .year-switch button{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--teal-deep);
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .year-switch button:hover{ background: #EFF6F5; }
+
+  .toolbar{
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .filter-bar{
+    display:flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 7px 14px;
+    border-radius: 999px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .filter-btn.active{
+    background: var(--teal-deep);
+    border-color: var(--teal-deep);
+    color: #fff;
+  }
+  .filter-btn:hover{ border-color: var(--teal); }
+
+  .calendar{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  @media (max-width: 900px){
+    .calendar{ grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .month-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    min-height: 150px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 1px 2px rgba(11,46,44,0.04);
+  }
+
+  .month-head{
+    background: var(--teal-deep);
+    color: #fff;
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 9px 12px;
+    display:flex;
+    justify-content: space-between;
+    align-items:center;
+  }
+
+  .month-head .count{
+    background: rgba(255,255,255,0.14);
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 999px;
+  }
+
+  .month-body{
+    padding: 10px;
+    display:flex;
+    flex-direction: column;
+    gap: 7px;
+    flex: 1;
+  }
+
+  .empty-hint{
+    font-size: 11.5px;
+    color: #C3D3D1;
+    font-style: italic;
+  }
+
+  .event{
+    position: relative;
+    border-radius: 8px;
+    padding: 7px 26px 7px 9px;
+    font-size: 11.5px;
+    line-height: 1.35;
+    border-left: 3px solid transparent;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .event.realizado{ background: var(--realizado-bg); border-left-color: var(--realizado); }
+  .event.andamento{ background: var(--andamento-bg); border-left-color: var(--andamento); }
+  .event.pendente{ background: var(--pendente-bg); border-left-color: var(--pendente); }
+
+  .event .eixo-tag{
+    display:block;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+    opacity: 0.7;
+    margin-bottom: 2px;
+  }
+
+  .event.realizado .eixo-tag{ color: var(--realizado); }
+  .event.andamento .eixo-tag{ color: var(--andamento); }
+  .event.pendente .eixo-tag{ color: var(--pendente); }
+
+  .event .titulo{
+    font-weight: 600;
+    color: var(--ink);
+    display:block;
+  }
+
+  .event .detalhes{
+    display:block;
+    color: var(--ink-soft);
+    font-size: 10.5px;
+    margin-top: 2px;
+  }
+
+  .del-btn{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: 18px;
+    height: 18px;
+    border: none;
+    background: rgba(11,46,44,0.08);
+    color: var(--ink-soft);
+    border-radius: 5px;
+    font-size: 11px;
+    line-height: 1;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .del-btn:hover{ background: var(--pendente); color: #fff; }
+
+  footer{
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    text-align: right;
+  }
+
+  /* Modal */
+  .overlay{
+    display:none;
+    position: fixed;
+    inset: 0;
+    background: rgba(11,46,44,0.45);
+    align-items:center;
+    justify-content:center;
+    z-index: 50;
+    padding: 20px;
+  }
+  .overlay.open{ display:flex; }
+
+  .modal{
+    background: var(--panel);
+    border-radius: 14px;
+    width: 100%;
+    max-width: 420px;
+    padding: 24px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+
+  .modal h2{
+    font-family: var(--font-display);
+    font-size: 17px;
+    color: var(--teal-deep);
+    margin: 0 0 16px 0;
+  }
+
+  .field{ margin-bottom: 14px; }
+  .field label{
+    display:block;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 5px;
+  }
+  .field input, .field select, .field textarea{
+    width: 100%;
+    padding: 9px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--ink);
+    background: #fff;
+  }
+  .field textarea{ resize: vertical; min-height: 50px; }
+  .field-row{ display:flex; gap: 10px; }
+  .field-row .field{ flex: 1; }
+
+  .modal-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap: 10px;
+    margin-top: 20px;
+  }
+
+  .modal-actions .right-actions{
+    display:flex;
+    gap: 10px;
+  }
+
+  .btn-ghost{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink-soft);
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-ghost:hover{ background: #EFF6F5; }
+
+  .btn-danger{
+    background: transparent;
+    border: 1px solid var(--pendente-bg);
+    color: var(--pendente);
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+  }
+  .btn-danger:hover{ background: var(--pendente); color: #fff; border-color: var(--pendente); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <p class="eyebrow">Crédito Central 2016 · Consultoria &amp; Suporte</p>
+      <h1>Calendário de Entregas</h1>
+    </div>
+    <div class="header-actions">
+      <div class="legend">
+        <span><i class="dot realizado"></i>Realizado</span>
+        <span><i class="dot andamento"></i>Em andamento</span>
+        <span><i class="dot pendente"></i>Pendente</span>
+      </div>
+      <div class="year-switch">
+        <button id="prevYear">‹</button>
+        <span id="yearLabel">2026</span>
+        <button id="nextYear">›</button>
+      </div>
+      <button class="btn-primary" id="openModalBtn">+ Novo evento</button>
+    </div>
+  </header>
+
+  <div class="toolbar">
+    <div class="filter-bar" id="filterBar">
+      <button class="filter-btn active" data-eixo="Consultoria Técnica">Consultoria Técnica</button>
+      <button class="filter-btn active" data-eixo="Suporte e Fomento ao Crédito">Suporte e Fomento ao Crédito</button>
+    </div>
+    <span style="font-size:11.5px;color:var(--ink-soft);">Dê 2 cliques em um evento para editar</span>
+  </div>
+
+  <div class="calendar" id="calendar"></div>
+
+  <footer>Crédito Central 2016 · dados salvos localmente no navegador</footer>
+</div>
+
+<!-- Modal de evento (novo ou edição) -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2 id="modalTitle">Novo evento</h2>
+    <form id="eventForm">
+      <div class="field">
+        <label for="eixo">Eixo</label>
+        <select id="eixo" required>
+          <option value="Consultoria Técnica">Consultoria Técnica</option>
+          <option value="Suporte e Fomento ao Crédito">Suporte e Fomento ao Crédito</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="entrega">Nome da entrega</label>
+        <input type="text" id="entrega" placeholder="Ex: Política de Crédito" required>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label for="status">Status</label>
+          <select id="status" required>
+            <option value="Realizado">Realizado</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Pendente">Pendente</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mes">Mês</label>
+          <select id="mes" required>
+            <option value="01">Janeiro</option>
+            <option value="02">Fevereiro</option>
+            <option value="03">Março</option>
+            <option value="04">Abril</option>
+            <option value="05">Maio</option>
+            <option value="06">Junho</option>
+            <option value="07">Julho</option>
+            <option value="08">Agosto</option>
+            <option value="09">Setembro</option>
+            <option value="10">Outubro</option>
+            <option value="11">Novembro</option>
+            <option value="12">Dezembro</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label for="detalhes">Detalhes</label>
+        <textarea id="detalhes" placeholder="Descrição curta da entrega"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-danger" id="deleteFromModalBtn" style="display:none;">Excluir</button>
+        <div class="right-actions">
+          <button type="button" class="btn-ghost" id="cancelBtn">Cancelar</button>
+          <button type="submit" class="btn-primary" id="submitBtn">Salvar evento</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  // ====== CONFIGURAÇÃO DO FIREBASE ======
+  // Substitua pelos valores reais copiados do console do Firebase (passo "Registrar um app Web")
+  const firebaseConfig = {
+    apiKey: "AIzaSyC_5pn65U31BUeKFI4uyH6yNfbnSY3t2KA",
+    authDomain: "credito-central-2026.firebaseapp.com",
+    projectId: "credito-central-2026",
+    storageBucket: "credito-central-2026.firebasestorage.app",
+    messagingSenderId: "1090169169557",
+    appId: "1:1090169169557:web:5e1a7257608c64200c5d9c"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const entregasRef = db.collection("entregas");
+
+  let eventos = [];
+  let anoAtual = 2026;
+  let editingId = null;
+
+  // Escuta mudanças em tempo real: qualquer criação/edição/exclusão feita por
+  // qualquer pessoa atualiza a tela na hora, sem precisar recarregar a página.
+  entregasRef.onSnapshot(snapshot => {
+    eventos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    renderCalendar();
+  }, error => {
+    console.error("Erro ao ler dados do Firestore:", error);
+    alert("Não foi possível conectar ao banco de dados. Verifique a configuração do Firebase.");
+  });
+
+  // Filtro: ambas categorias ativas por padrão (mantém as duas)
+  let filtroAtivo = new Set(["Consultoria Técnica", "Suporte e Fomento ao Crédito"]);
+
+  const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+
+  const statusClass = {
+    "Realizado": "realizado",
+    "Em andamento": "andamento",
+    "Pendente": "pendente"
+  };
+
+  function renderCalendar(){
+    document.getElementById("yearLabel").textContent = anoAtual;
+    const calendar = document.getElementById("calendar");
+    calendar.innerHTML = "";
+
+    const eventosFiltrados = eventos.filter(ev => filtroAtivo.has(ev.eixo));
+
+    for (let m = 1; m <= 12; m++){
+      const mesStr = String(m).padStart(2, "0");
+      const itensDoMes = eventosFiltrados.filter(ev => ev.mesNum === mesStr && Number(ev.ano) === anoAtual);
+
+      const card = document.createElement("div");
+      card.className = "month-card";
+
+      const head = document.createElement("div");
+      head.className = "month-head";
+      head.innerHTML = `<span>${nomesMeses[m-1]}</span>${itensDoMes.length ? `<span class="count">${itensDoMes.length}</span>` : ""}`;
+      card.appendChild(head);
+
+      const body = document.createElement("div");
+      body.className = "month-body";
+
+      if (itensDoMes.length === 0){
+        body.innerHTML = `<span class="empty-hint">Sem entregas</span>`;
+      } else {
+        itensDoMes.forEach(item => {
+          const cls = statusClass[item.status] || "pendente";
+          const ev = document.createElement("div");
+          ev.className = `event ${cls}`;
+          ev.setAttribute("data-id", item.id);
+          ev.innerHTML = `
+            <button class="del-btn" data-id="${item.id}" title="Excluir evento">×</button>
+            <span class="eixo-tag">${item.eixo}</span>
+            <span class="titulo">${item.entrega}</span>
+            ${item.detalhes ? `<span class="detalhes">${item.detalhes}</span>` : ""}
+          `;
+          body.appendChild(ev);
+        });
+      }
+
+      card.appendChild(body);
+      calendar.appendChild(card);
+    }
+
+    document.querySelectorAll(".del-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute("data-id");
+        if (confirm("Excluir este evento?")){
+          entregasRef.doc(id).delete().catch(err => {
+            console.error("Erro ao excluir:", err);
+            alert("Não foi possível excluir o evento.");
+          });
+        }
+      });
+    });
+
+    document.querySelectorAll(".event").forEach(evEl => {
+      evEl.addEventListener("dblclick", () => {
+        const id = evEl.getAttribute("data-id");
+        abrirModalEdicao(id);
+      });
+    });
+  }
+
+  // Filtro de categorias
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const eixo = btn.getAttribute("data-eixo");
+      if (filtroAtivo.has(eixo)){
+        filtroAtivo.delete(eixo);
+        btn.classList.remove("active");
+      } else {
+        filtroAtivo.add(eixo);
+        btn.classList.add("active");
+      }
+      renderCalendar();
+    });
+  });
+
+  // Modal
+  const overlay = document.getElementById("overlay");
+  const modalTitle = document.getElementById("modalTitle");
+  const submitBtn = document.getElementById("submitBtn");
+  const deleteFromModalBtn = document.getElementById("deleteFromModalBtn");
+
+  function abrirModalNovo(){
+    editingId = null;
+    modalTitle.textContent = "Novo evento";
+    submitBtn.textContent = "Salvar evento";
+    deleteFromModalBtn.style.display = "none";
+    document.getElementById("eventForm").reset();
+    overlay.classList.add("open");
+  }
+
+  function abrirModalEdicao(id){
+    const item = eventos.find(ev => ev.id === id);
+    if (!item) return;
+    editingId = id;
+    modalTitle.textContent = "Editar evento";
+    submitBtn.textContent = "Salvar alterações";
+    deleteFromModalBtn.style.display = "inline-block";
+
+    document.getElementById("eixo").value = item.eixo;
+    document.getElementById("entrega").value = item.entrega;
+    document.getElementById("status").value = item.status;
+    document.getElementById("mes").value = item.mesNum;
+    document.getElementById("detalhes").value = item.detalhes || "";
+
+    overlay.classList.add("open");
+  }
+
+  document.getElementById("openModalBtn").addEventListener("click", abrirModalNovo);
+  document.getElementById("cancelBtn").addEventListener("click", () => overlay.classList.remove("open"));
+  overlay.addEventListener("click", (e) => { if (e.target === overlay) overlay.classList.remove("open"); });
+
+  deleteFromModalBtn.addEventListener("click", () => {
+    if (!editingId) return;
+    if (confirm("Excluir este evento?")){
+      entregasRef.doc(editingId).delete()
+        .then(() => { overlay.classList.remove("open"); })
+        .catch(err => {
+          console.error("Erro ao excluir:", err);
+          alert("Não foi possível excluir o evento.");
+        });
+    }
+  });
+
+  document.getElementById("eventForm").addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const dadosForm = {
+      eixo: document.getElementById("eixo").value,
+      entrega: document.getElementById("entrega").value.trim(),
+      status: document.getElementById("status").value,
+      detalhes: document.getElementById("detalhes").value.trim(),
+      ano: anoAtual,
+      mesNum: document.getElementById("mes").value
+    };
+
+    const salvamento = editingId
+      ? entregasRef.doc(editingId).update(dadosForm)
+      : entregasRef.add(dadosForm);
+
+    salvamento
+      .then(() => {
+        e.target.reset();
+        editingId = null;
+        overlay.classList.remove("open");
+      })
+      .catch(err => {
+        console.error("Erro ao salvar:", err);
+        alert("Não foi possível salvar o evento. Verifique sua conexão.");
+      });
+  });
+
+  // Troca de ano
+  document.getElementById("prevYear").addEventListener("click", () => { anoAtual--; renderCalendar(); });
+  document.getElementById("nextYear").addEventListener("click", () => { anoAtual++; renderCalendar(); });
+
+  renderCalendar();
+</script>
+</body>
+</html>
