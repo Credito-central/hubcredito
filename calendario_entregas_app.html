@@ -478,7 +478,7 @@
     background: #EFF6F5;
     border: 1px solid var(--line);
     border-radius: 4px 12px 12px 12px;
-    padding: 6px 10px;
+    padding: 6px 22px 6px 10px;
     font-size: 10.5px;
     line-height: 1.35;
     color: var(--ink);
@@ -492,6 +492,26 @@
     text-transform: uppercase;
     letter-spacing: 0.03em;
   }
+
+  .comment-del-btn{
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    border: none;
+    background: rgba(11,46,44,0.08);
+    color: var(--ink-soft);
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 0;
+  }
+  .comment-del-btn:hover{ background: var(--pendente); color: #fff; }
 
   .comment-toggle-btn{
     background: transparent;
@@ -913,12 +933,15 @@
             : "";
 
           const bolhasHtml = comentarios.length
-            ? `<div class="comment-bubbles">${comentarios.map(c => {
+            ? `<div class="comment-bubbles">${comentarios.map((c, idx) => {
                 const p = participantePorNome(c.autor);
                 const foto = p ? p.foto : "";
                 return `<div class="comment-bubble">
                   <img class="bubble-photo" src="${foto}" alt="${c.autor}" onerror="this.style.visibility='hidden'">
-                  <div class="bubble-text"><span class="bubble-author">${c.autor}</span>${c.texto}</div>
+                  <div class="bubble-text">
+                    <span class="bubble-author">${c.autor}</span>${c.texto}
+                    <button type="button" class="comment-del-btn" data-event-id="${item.id}" data-comment-index="${idx}" title="Excluir comentário">×</button>
+                  </div>
                 </div>`;
               }).join("")}</div>`
             : "";
@@ -1012,6 +1035,26 @@
           console.error("Erro ao salvar comentário:", err);
           alert("Não foi possível salvar o comentário.");
         });
+      });
+    });
+
+    document.querySelectorAll(".comment-del-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const eventId = btn.getAttribute("data-event-id");
+        const idx = Number(btn.getAttribute("data-comment-index"));
+        const evento = eventos.find(ev => ev.id === eventId);
+        if (!evento || !evento.comentarios || !evento.comentarios[idx]) return;
+
+        const comentarioParaRemover = evento.comentarios[idx];
+        if (confirm("Excluir este comentário?")){
+          entregasRef.doc(eventId).update({
+            comentarios: firebase.firestore.FieldValue.arrayRemove(comentarioParaRemover)
+          }).catch(err => {
+            console.error("Erro ao excluir comentário:", err);
+            alert("Não foi possível excluir o comentário.");
+          });
+        }
       });
     });
 
