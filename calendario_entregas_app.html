@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calendário de Entregas — Crédito Central 2016</title>
+<title>Calendário de Ações — Crédito Central 2016</title>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <style>
@@ -369,6 +369,215 @@
     cursor: pointer;
   }
   .btn-danger:hover{ background: var(--pendente); color: #fff; border-color: var(--pendente); }
+
+  /* Multiselect de participantes */
+  .ms-wrap{ position: relative; }
+  .ms-trigger{
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 9px 10px;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .ms-trigger:hover{ border-color: var(--teal); }
+  .ms-panel{
+    display:none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.14);
+    max-height: 220px;
+    overflow-y: auto;
+    z-index: 60;
+    padding: 6px;
+  }
+  .ms-panel.open{ display:block; }
+  .ms-group-label{
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 700;
+    color: var(--ink-soft);
+    opacity: 0.7;
+    padding: 6px 8px 2px;
+  }
+  .ms-item{
+    display:flex;
+    align-items:center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12.5px;
+    text-align: left;
+  }
+  .ms-item:hover{ background: #EFF6F5; }
+  .ms-item input{ margin:0; flex-shrink:0; }
+  .ms-item span{ flex:1; }
+
+  /* Avatares e comentários dentro do card de evento */
+  .comment-section{
+    display:none;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+  .comment-section.visible{ display:block; }
+
+  .avatar-row{
+    display:flex;
+    gap: 4px;
+    margin-bottom: 6px;
+  }
+  .avatar-mini{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1.5px solid #fff;
+    box-shadow: 0 0 0 1px var(--line);
+    background: #EFF6F5;
+  }
+
+  .comment-bubbles{
+    display:flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .comment-bubble{
+    display:flex;
+    align-items:flex-start;
+    gap: 6px;
+  }
+  .bubble-photo{
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid var(--line);
+    background: #EFF6F5;
+    margin-top: 2px;
+  }
+  .bubble-text{
+    position: relative;
+    background: #EFF6F5;
+    border: 1px solid var(--line);
+    border-radius: 4px 12px 12px 12px;
+    padding: 6px 10px;
+    font-size: 10.5px;
+    line-height: 1.35;
+    color: var(--ink);
+  }
+  .bubble-author{
+    display:block;
+    font-weight: 700;
+    font-size: 9px;
+    color: var(--teal-deep);
+    margin-bottom: 1px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .comment-toggle-btn{
+    background: transparent;
+    border: 1px dashed var(--line);
+    color: var(--teal-deep);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 10.5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  .comment-toggle-btn:hover{ background: #EFF6F5; border-color: var(--teal); }
+
+  .comment-composer{
+    display:none;
+    margin-top: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .comment-composer.open{ display:flex; }
+  .comment-composer select, .comment-composer textarea{
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    color: var(--ink);
+    background: #fff;
+  }
+  .comment-composer textarea{ min-height: 42px; resize: vertical; }
+  .composer-send{
+    align-self: flex-end;
+    padding: 6px 12px;
+    font-size: 11.5px;
+  }
+
+  /* Filtro horizontal por participante (foto) */
+  .participant-filter-bar{
+    display:flex;
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 2px 12px;
+    margin-bottom: 4px;
+  }
+  .participant-filter-btn{
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .participant-filter-btn .avatar-circle{
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #EFF6F5;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border: 2px solid var(--line);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .participant-filter-btn .avatar-circle img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .participant-filter-btn .avatar-initial{
+    font-weight: 700;
+    color: var(--teal-deep);
+    font-size: 14px;
+    font-family: var(--font-display);
+  }
+  .participant-filter-btn .avatar-label{
+    font-size: 9.5px;
+    color: var(--ink-soft);
+    font-weight: 600;
+  }
+  .participant-filter-btn.active .avatar-circle{
+    border-color: var(--teal-deep);
+    box-shadow: 0 0 0 3px rgba(0,174,157,0.18);
+  }
+  .participant-filter-btn.active .avatar-label{ color: var(--teal-deep); }
 </style>
 </head>
 <body>
@@ -377,7 +586,7 @@
   <header>
     <div>
       <p class="eyebrow">Central 2016 - Área de Crédito</p>
-      <h1>Calendário de Entregas</h1>
+      <h1>Calendário de Ações</h1>
     </div>
     <div class="header-actions">
       <div class="legend">
@@ -390,7 +599,7 @@
         <span id="yearLabel">2026</span>
         <button id="nextYear">›</button>
       </div>
-      <button class="btn-primary" id="openModalBtn">+ Novo evento</button>
+      <button class="btn-primary" id="openModalBtn">+ Nova ação</button>
     </div>
   </header>
 
@@ -398,9 +607,12 @@
     <div class="filter-bar" id="filterBar">
       <button class="filter-btn active" data-eixo="Consultoria Técnica">Consultoria Técnica</button>
       <button class="filter-btn active" data-eixo="Suporte e Fomento ao Crédito">Suporte e Fomento ao Crédito</button>
+      <button class="filter-btn active" data-eixo="Consultoria e Suporte">Consultoria e Suporte</button>
     </div>
     <span style="font-size:11.5px;color:var(--ink-soft);">Dê 2 cliques em um evento para editar</span>
   </div>
+
+  <div class="participant-filter-bar" id="participantFilterBar"></div>
 
   <div class="calendar" id="calendar"></div>
 
@@ -410,13 +622,14 @@
 <!-- Modal de evento (novo ou edição) -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <h2 id="modalTitle">Novo evento</h2>
+    <h2 id="modalTitle">Nova ação</h2>
     <form id="eventForm">
       <div class="field">
         <label for="eixo">Eixo</label>
         <select id="eixo" required>
           <option value="Consultoria Técnica">Consultoria Técnica</option>
           <option value="Suporte e Fomento ao Crédito">Suporte e Fomento ao Crédito</option>
+          <option value="Consultoria e Suporte">Consultoria e Suporte</option>
         </select>
       </div>
       <div class="field">
@@ -448,6 +661,13 @@
             <option value="11">Novembro</option>
             <option value="12">Dezembro</option>
           </select>
+        </div>
+      </div>
+      <div class="field">
+        <label>Participantes</label>
+        <div class="ms-wrap">
+          <button type="button" class="ms-trigger" id="participantesTrigger">Selecionar participantes</button>
+          <div class="ms-panel" id="participantesPanel"></div>
         </div>
       </div>
       <div class="field">
@@ -495,8 +715,138 @@
     alert("Não foi possível conectar ao banco de dados. Verifique a configuração do Firebase.");
   });
 
-  // Filtro: ambas categorias ativas por padrão (mantém as duas)
-  let filtroAtivo = new Set(["Consultoria Técnica", "Suporte e Fomento ao Crédito"]);
+  // Filtro: todas as categorias ativas por padrão
+  let filtroAtivo = new Set(["Consultoria Técnica", "Suporte e Fomento ao Crédito", "Consultoria e Suporte"]);
+
+  // Filtro por participante (foto): vazio = sem filtro, mostra todos os eventos
+  let participantesFiltroAtivo = new Set();
+
+  // Estrutura da equipe, usada pra popular o campo Participantes e os avatares/comentários
+  const estrutura = {
+    consultoria: {
+      titulo: "Consultoria Técnica",
+      membros: [
+        { nome: "Thais de Paula", foto: "images/2016thais.jpg", email: "thais.paula@sicoob.com.br", feriasInicio: null, feriasFim: null },
+        { nome: "Matheus", foto: "images/2016matheus.jpg", email: "matheus.xavier@sicoob.com.br", feriasInicio: null, feriasFim: null },
+        { nome: "Camila", foto: "images/2016camila.jpg", email: "camila@sicoob.com.br", feriasInicio: null, feriasFim: null }
+      ]
+    },
+    suporteComercial: {
+      titulo: "Suporte e Comercial",
+      subAreas: {
+        comercial: {
+          label: "Comercial",
+          membros: [
+            { nome: "Gisele", foto: "images/2016gisele.jpg", email: "gisele.pavao@sicoob.com.br", feriasInicio: "2026-06-10", feriasFim: "2026-08-13" },
+            { nome: "Thamires", foto: "images/2016thamires.jpg", email: "thamires@sicoob.com.br", feriasInicio: null, feriasFim: null },
+            { nome: "Roberta", foto: "images/2016roberta.jpg", email: "roberta.danielle@sicoob.com.br", feriasInicio: null, feriasFim: null }
+          ]
+        },
+        rural: {
+          label: "Rural e Câmbio",
+          membros: [
+            { nome: "Dilermando", foto: "images/2016dilermando.jpg", email: "dilermando@sicoob.com.br", feriasInicio: null, feriasFim: null },
+            { nome: "Denise", foto: "images/2016denise.jpg", email: "denise.francisca@sicoob.com.br", feriasInicio: null, feriasFim: null }
+          ]
+        }
+      }
+    }
+  };
+
+  function todosParticipantes(){
+    const lista = [...estrutura.consultoria.membros];
+    Object.values(estrutura.suporteComercial.subAreas).forEach(sub => {
+      lista.push(...sub.membros);
+    });
+    return lista;
+  }
+
+  function participantePorNome(nome){
+    return todosParticipantes().find(p => p.nome === nome);
+  }
+
+  // Controla, localmente na sessão, quais eventos têm a seção de comentários
+  // aberta e quais têm o composer (formulário de novo comentário) aberto.
+  const secoesAbertas = new Set();
+  const composersAbertos = new Set();
+
+  let participantesSelecionados = new Set();
+
+  function itemCheckboxHtml(m){
+    return `<label class="ms-item">
+      <input type="checkbox" value="${m.nome}">
+      <span>${m.nome}</span>
+    </label>`;
+  }
+
+  function popularParticipantesPanel(){
+    const panel = document.getElementById("participantesPanel");
+    let html = `<div class="ms-group-label">${estrutura.consultoria.titulo}</div>`;
+    estrutura.consultoria.membros.forEach(m => { html += itemCheckboxHtml(m); });
+    Object.values(estrutura.suporteComercial.subAreas).forEach(sub => {
+      html += `<div class="ms-group-label">${sub.label}</div>`;
+      sub.membros.forEach(m => { html += itemCheckboxHtml(m); });
+    });
+    panel.innerHTML = html;
+
+    panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) participantesSelecionados.add(chk.value);
+        else participantesSelecionados.delete(chk.value);
+        atualizarTriggerParticipantes();
+      });
+    });
+  }
+
+  function atualizarTriggerParticipantes(){
+    const trigger = document.getElementById("participantesTrigger");
+    trigger.textContent = participantesSelecionados.size === 0
+      ? "Selecionar participantes"
+      : Array.from(participantesSelecionados).join(", ");
+  }
+
+  popularParticipantesPanel();
+
+  function popularParticipantFilterBar(){
+    const bar = document.getElementById("participantFilterBar");
+    bar.innerHTML = todosParticipantes().map(m => `
+      <button type="button" class="participant-filter-btn" data-participante="${m.nome}" title="${m.nome}">
+        <span class="avatar-circle">
+          <img src="${m.foto}" alt="${m.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <span class="avatar-initial" style="display:none;">${m.nome.charAt(0)}</span>
+        </span>
+        <span class="avatar-label">${m.nome.split(" ")[0]}</span>
+      </button>
+    `).join("");
+
+    bar.querySelectorAll(".participant-filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const nome = btn.getAttribute("data-participante");
+        if (participantesFiltroAtivo.has(nome)){
+          participantesFiltroAtivo.delete(nome);
+          btn.classList.remove("active");
+        } else {
+          participantesFiltroAtivo.add(nome);
+          btn.classList.add("active");
+        }
+        renderCalendar();
+      });
+    });
+  }
+
+  popularParticipantFilterBar();
+
+  document.getElementById("participantesTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("participantesPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("participantesPanel");
+    const trigger = document.getElementById("participantesTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
+  });
 
   const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
@@ -511,7 +861,9 @@
     const calendar = document.getElementById("calendar");
     calendar.innerHTML = "";
 
-    const eventosFiltrados = eventos.filter(ev => filtroAtivo.has(ev.eixo));
+    const eventosFiltrados = eventos
+      .filter(ev => filtroAtivo.has(ev.eixo))
+      .filter(ev => participantesFiltroAtivo.size === 0 || (ev.participantes || []).some(p => participantesFiltroAtivo.has(p)));
 
     for (let m = 1; m <= 12; m++){
       const mesStr = String(m).padStart(2, "0");
@@ -536,11 +888,56 @@
           const ev = document.createElement("div");
           ev.className = `event ${cls}`;
           ev.setAttribute("data-id", item.id);
+
+          const participantes = item.participantes || [];
+          const comentarios = item.comentarios || [];
+
+          const participantesTextoHtml = participantes.length
+            ? `<span class="detalhes">Participantes: ${participantes.join(", ")}</span>`
+            : "";
+
+          const avataresHtml = participantes.length
+            ? `<div class="avatar-row">${participantes.map(nome => {
+                const p = participantePorNome(nome);
+                const foto = p ? p.foto : "";
+                return `<img class="avatar-mini" src="${foto}" alt="${nome}" title="${nome}" onerror="this.style.visibility='hidden'">`;
+              }).join("")}</div>`
+            : "";
+
+          const bolhasHtml = comentarios.length
+            ? `<div class="comment-bubbles">${comentarios.map(c => {
+                const p = participantePorNome(c.autor);
+                const foto = p ? p.foto : "";
+                return `<div class="comment-bubble">
+                  <img class="bubble-photo" src="${foto}" alt="${c.autor}" onerror="this.style.visibility='hidden'">
+                  <div class="bubble-text"><span class="bubble-author">${c.autor}</span>${c.texto}</div>
+                </div>`;
+              }).join("")}</div>`
+            : "";
+
+          const secaoAberta = secoesAbertas.has(item.id) ? "visible" : "";
+          const composerAberto = composersAbertos.has(item.id) ? "open" : "";
+          const opcoesAutor = todosParticipantes().map(p => `<option value="${p.nome}">${p.nome}</option>`).join("");
+
           ev.innerHTML = `
             <button class="del-btn" data-id="${item.id}" title="Excluir evento">×</button>
             <span class="eixo-tag">${item.eixo}</span>
             <span class="titulo">${item.entrega}</span>
             ${item.detalhes ? `<span class="detalhes">${item.detalhes}</span>` : ""}
+            ${participantesTextoHtml}
+            <div class="comment-section ${secaoAberta}" data-comment-section="${item.id}">
+              ${avataresHtml}
+              ${bolhasHtml}
+              <button type="button" class="comment-toggle-btn" data-toggle-composer="${item.id}">+ Comentário</button>
+              <div class="comment-composer ${composerAberto}" data-composer="${item.id}">
+                <select class="composer-autor" data-autor-select="${item.id}">
+                  <option value="">Quem está comentando?</option>
+                  ${opcoesAutor}
+                </select>
+                <textarea class="composer-texto" data-texto="${item.id}" placeholder="Escreva um comentário..."></textarea>
+                <button type="button" class="btn-primary composer-send" data-send="${item.id}">Comentar</button>
+              </div>
+            </div>
           `;
           body.appendChild(ev);
         });
@@ -564,9 +961,49 @@
     });
 
     document.querySelectorAll(".event").forEach(evEl => {
-      evEl.addEventListener("dblclick", () => {
+      evEl.addEventListener("click", (e) => {
+        if (e.target.closest(".comment-section") || e.target.closest(".del-btn")) return;
+        const id = evEl.getAttribute("data-id");
+        if (secoesAbertas.has(id)) secoesAbertas.delete(id);
+        else secoesAbertas.add(id);
+        renderCalendar();
+      });
+      evEl.addEventListener("dblclick", (e) => {
+        if (e.target.closest(".comment-section")) return;
         const id = evEl.getAttribute("data-id");
         abrirModalEdicao(id);
+      });
+    });
+
+    document.querySelectorAll("[data-toggle-composer]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute("data-toggle-composer");
+        if (composersAbertos.has(id)) composersAbertos.delete(id);
+        else composersAbertos.add(id);
+        renderCalendar();
+      });
+    });
+
+    document.querySelectorAll(".composer-send").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute("data-send");
+        const autorSelect = document.querySelector(`[data-autor-select="${id}"]`);
+        const textoArea = document.querySelector(`[data-texto="${id}"]`);
+        const autor = autorSelect.value;
+        const texto = textoArea.value.trim();
+        if (!autor || !texto){
+          alert("Selecione quem está comentando e escreva o comentário.");
+          return;
+        }
+        const novoComentario = { autor, texto, ts: new Date().toISOString() };
+        entregasRef.doc(id).update({
+          comentarios: firebase.firestore.FieldValue.arrayUnion(novoComentario)
+        }).catch(err => {
+          console.error("Erro ao salvar comentário:", err);
+          alert("Não foi possível salvar o comentário.");
+        });
       });
     });
   }
@@ -594,10 +1031,15 @@
 
   function abrirModalNovo(){
     editingId = null;
-    modalTitle.textContent = "Novo evento";
+    modalTitle.textContent = "Nova ação";
     submitBtn.textContent = "Salvar evento";
     deleteFromModalBtn.style.display = "none";
     document.getElementById("eventForm").reset();
+
+    participantesSelecionados = new Set();
+    document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => chk.checked = false);
+    atualizarTriggerParticipantes();
+
     overlay.classList.add("open");
   }
 
@@ -614,6 +1056,12 @@
     document.getElementById("status").value = item.status;
     document.getElementById("mes").value = item.mesNum;
     document.getElementById("detalhes").value = item.detalhes || "";
+
+    participantesSelecionados = new Set(item.participantes || []);
+    document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => {
+      chk.checked = participantesSelecionados.has(chk.value);
+    });
+    atualizarTriggerParticipantes();
 
     overlay.classList.add("open");
   }
@@ -642,6 +1090,7 @@
       entrega: document.getElementById("entrega").value.trim(),
       status: document.getElementById("status").value,
       detalhes: document.getElementById("detalhes").value.trim(),
+      participantes: Array.from(participantesSelecionados),
       ano: anoAtual,
       mesNum: document.getElementById("mes").value
     };
