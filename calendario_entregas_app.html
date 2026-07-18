@@ -874,6 +874,20 @@
 
   const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
+  // Escapa qualquer texto antes de inserir no HTML, prevenindo XSS
+  // (necessário porque as regras do Firestore atualmente aceitam escrita de
+  // qualquer pessoa com o link, então nenhum dado vindo do banco pode ser
+  // tratado como confiável).
+  function escapeHtml(valor){
+    if (valor === undefined || valor === null) return "";
+    return String(valor)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
   const statusClass = {
     "Realizado": "realizado",
     "Em andamento": "andamento",
@@ -921,14 +935,14 @@
           const comentarios = item.comentarios || [];
 
           const participantesTextoHtml = participantes.length
-            ? `<span class="detalhes">Participantes: ${participantes.join(", ")}</span>`
+            ? `<span class="detalhes">Participantes: ${participantes.map(n => escapeHtml(n)).join(", ")}</span>`
             : "";
 
           const avataresHtml = participantes.length
             ? `<div class="avatar-row">${participantes.map(nome => {
                 const p = participantePorNome(nome);
                 const foto = p ? p.foto : "";
-                return `<img class="avatar-mini" src="${foto}" alt="${nome}" title="${nome}" onerror="this.style.visibility='hidden'">`;
+                return `<img class="avatar-mini" src="${foto}" alt="${escapeHtml(nome)}" title="${escapeHtml(nome)}" onerror="this.style.visibility='hidden'">`;
               }).join("")}</div>`
             : "";
 
@@ -937,10 +951,10 @@
                 const p = participantePorNome(c.autor);
                 const foto = p ? p.foto : "";
                 return `<div class="comment-bubble">
-                  <img class="bubble-photo" src="${foto}" alt="${c.autor}" onerror="this.style.visibility='hidden'">
+                  <img class="bubble-photo" src="${foto}" alt="${escapeHtml(c.autor)}" onerror="this.style.visibility='hidden'">
                   <div class="bubble-text">
-                    <span class="bubble-author">${c.autor}</span>${c.texto}
-                    <button type="button" class="comment-del-btn" data-event-id="${item.id}" data-comment-index="${idx}" title="Excluir comentário">×</button>
+                    <span class="bubble-author">${escapeHtml(c.autor)}</span>${escapeHtml(c.texto)}
+                    <button type="button" class="comment-del-btn" data-event-id="${escapeHtml(item.id)}" data-comment-index="${idx}" title="Excluir comentário">×</button>
                   </div>
                 </div>`;
               }).join("")}</div>`
@@ -951,22 +965,22 @@
           const opcoesAutor = todosParticipantes().map(p => `<option value="${p.nome}">${p.nome}</option>`).join("");
 
           ev.innerHTML = `
-            <button class="del-btn" data-id="${item.id}" title="Excluir evento">×</button>
-            <span class="eixo-tag">${item.eixo}</span>
-            <span class="titulo">${item.entrega}</span>
-            ${item.detalhes ? `<span class="detalhes">${item.detalhes}</span>` : ""}
+            <button class="del-btn" data-id="${escapeHtml(item.id)}" title="Excluir evento">×</button>
+            <span class="eixo-tag">${escapeHtml(item.eixo)}</span>
+            <span class="titulo">${escapeHtml(item.entrega)}</span>
+            ${item.detalhes ? `<span class="detalhes">${escapeHtml(item.detalhes)}</span>` : ""}
             ${participantesTextoHtml}
-            <div class="comment-section ${secaoAberta}" data-comment-section="${item.id}" draggable="false">
+            <div class="comment-section ${secaoAberta}" data-comment-section="${escapeHtml(item.id)}" draggable="false">
               ${avataresHtml}
               ${bolhasHtml}
-              <button type="button" class="comment-toggle-btn" data-toggle-composer="${item.id}">+ Comentário</button>
-              <div class="comment-composer ${composerAberto}" data-composer="${item.id}">
-                <select class="composer-autor" data-autor-select="${item.id}">
+              <button type="button" class="comment-toggle-btn" data-toggle-composer="${escapeHtml(item.id)}">+ Comentário</button>
+              <div class="comment-composer ${composerAberto}" data-composer="${escapeHtml(item.id)}">
+                <select class="composer-autor" data-autor-select="${escapeHtml(item.id)}">
                   <option value="">Quem está comentando?</option>
                   ${opcoesAutor}
                 </select>
-                <textarea class="composer-texto" data-texto="${item.id}" placeholder="Escreva um comentário..."></textarea>
-                <button type="button" class="btn-primary composer-send" data-send="${item.id}">Comentar</button>
+                <textarea class="composer-texto" data-texto="${escapeHtml(item.id)}" placeholder="Escreva um comentário..."></textarea>
+                <button type="button" class="btn-primary composer-send" data-send="${escapeHtml(item.id)}">Comentar</button>
               </div>
             </div>
           `;
