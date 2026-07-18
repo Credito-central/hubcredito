@@ -217,8 +217,12 @@
     font-size: 11.5px;
     line-height: 1.35;
     border-left: 3px solid transparent;
-    cursor: pointer;
+    cursor: grab;
     user-select: none;
+  }
+
+  .event.dragging{
+    opacity: 0.4;
   }
 
   .event.realizado{ background: var(--realizado-bg); border-left-color: var(--realizado); }
@@ -867,7 +871,9 @@
 
     for (let m = 1; m <= 12; m++){
       const mesStr = String(m).padStart(2, "0");
-      const itensDoMes = eventosFiltrados.filter(ev => ev.mesNum === mesStr && Number(ev.ano) === anoAtual);
+      const itensDoMes = eventosFiltrados
+        .filter(ev => ev.mesNum === mesStr && Number(ev.ano) === anoAtual)
+        .sort((a, b) => (a.ordem ?? 0) - (b.ordem ?? 0));
 
       const card = document.createElement("div");
       card.className = "month-card";
@@ -879,6 +885,7 @@
 
       const body = document.createElement("div");
       body.className = "month-body";
+      body.setAttribute("data-mes", mesStr);
 
       if (itensDoMes.length === 0){
         body.innerHTML = `<span class="empty-hint">Sem entregas</span>`;
@@ -888,6 +895,7 @@
           const ev = document.createElement("div");
           ev.className = `event ${cls}`;
           ev.setAttribute("data-id", item.id);
+          ev.setAttribute("draggable", "true");
 
           const participantes = item.participantes || [];
           const comentarios = item.comentarios || [];
@@ -925,7 +933,7 @@
             <span class="titulo">${item.entrega}</span>
             ${item.detalhes ? `<span class="detalhes">${item.detalhes}</span>` : ""}
             ${participantesTextoHtml}
-            <div class="comment-section ${secaoAberta}" data-comment-section="${item.id}">
+            <div class="comment-section ${secaoAberta}" data-comment-section="${item.id}" draggable="false">
               ${avataresHtml}
               ${bolhasHtml}
               <button type="button" class="comment-toggle-btn" data-toggle-composer="${item.id}">+ Comentário</button>
@@ -1003,6 +1011,69 @@
         }).catch(err => {
           console.error("Erro ao salvar comentário:", err);
           alert("Não foi possível salvar o comentário.");
+        });
+      });
+    });
+
+    // ====== ARRASTAR E SOLTAR (mover entre meses e reordenar dentro do mês) ======
+    document.querySelectorAll(".event").forEach(evEl => {
+      evEl.addEventListener("dragstart", () => {
+        evEl.classList.add("dragging");
+      });
+      evEl.addEventListener("dragend", () => {
+        evEl.classList.remove("dragging");
+      });
+    });
+
+    function pegarElementoAposArraste(container, y){
+      const elementosArrastaveis = [...container.querySelectorAll(".event:not(.dragging)")];
+      return elementosArrastaveis.reduce((maisProximo, filho) => {
+        const box = filho.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > maisProximo.offset){
+          return { offset, elemento: filho };
+        }
+        return maisProximo;
+      }, { offset: Number.NEGATIVE_INFINITY, elemento: null }).elemento;
+    }
+
+    document.querySelectorAll(".month-body").forEach(monthBody => {
+      monthBody.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        const arrastando = document.querySelector(".event.dragging");
+        if (!arrastando) return;
+
+        const dicaVazia = monthBody.querySelector(".empty-hint");
+        if (dicaVazia) dicaVazia.remove();
+
+        const elementoApos = pegarElementoAposArraste(monthBody, e.clientY);
+        if (elementoApos == null){
+          monthBody.appendChild(arrastando);
+        } else {
+          monthBody.insertBefore(arrastando, elementoApos);
+        }
+      });
+
+      monthBody.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const idMovido = document.querySelector(".event.dragging")?.getAttribute("data-id");
+        if (!idMovido) return;
+
+        const novoMes = monthBody.getAttribute("data-mes");
+        const idsNaOrdemFinal = [...monthBody.querySelectorAll(".event")].map(el => el.getAttribute("data-id"));
+
+        const atualizacoes = idsNaOrdemFinal.map((idItem, indice) => {
+          const dados = { ordem: indice };
+          if (idItem === idMovido){
+            dados.mesNum = novoMes;
+            dados.ano = anoAtual;
+          }
+          return entregasRef.doc(idItem).update(dados);
+        });
+
+        Promise.all(atualizacoes).catch(err => {
+          console.error("Erro ao salvar nova posição:", err);
+          alert("Não foi possível salvar a nova posição da ação.");
         });
       });
     });
