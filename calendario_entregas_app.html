@@ -888,7 +888,7 @@
       body.setAttribute("data-mes", mesStr);
 
       if (itensDoMes.length === 0){
-        body.innerHTML = `<span class="empty-hint">Sem entregas</span>`;
+        body.innerHTML = "";
       } else {
         itensDoMes.forEach(item => {
           const cls = statusClass[item.status] || "pendente";
