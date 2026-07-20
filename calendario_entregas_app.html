@@ -602,10 +602,73 @@
     box-shadow: 0 0 0 3px rgba(0,174,157,0.18);
   }
   .participant-filter-btn.active .avatar-label{ color: var(--teal-deep); }
+
+  /* Tela de acesso com chave */
+  .access-gate{
+    position: fixed;
+    inset: 0;
+    background: var(--teal-deep);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 200;
+    padding: 20px;
+  }
+  .access-box{
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 360px;
+    text-align:center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .access-box .eyebrow{ text-align:center; }
+  .access-box h2{
+    font-family: var(--font-display);
+    color: var(--teal-deep);
+    font-size: 20px;
+    margin: 4px 0 10px;
+  }
+  .access-hint{
+    font-size: 12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 18px;
+  }
+  #accessKeyInput{
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 12px;
+    text-align:center;
+  }
+  .access-box .btn-primary{ width: 100%; }
+  .access-error{
+    display:none;
+    color: var(--pendente);
+    font-size: 12px;
+    font-weight: 600;
+    margin: 10px 0 0;
+  }
+  .access-error.show{ display:block; }
 </style>
 </head>
 <body>
-<div class="wrap">
+
+<div class="access-gate" id="accessGate">
+  <div class="access-box">
+    <p class="eyebrow">Crédito Central 2016</p>
+    <h2>Acesso restrito</h2>
+    <p class="access-hint">Digite a chave de acesso para abrir o calendário.</p>
+    <input type="password" id="accessKeyInput" placeholder="Chave de acesso" autocomplete="off">
+    <button class="btn-primary" id="accessKeyBtn">Entrar</button>
+    <p class="access-error" id="accessError">Chave incorreta. Tente novamente.</p>
+  </div>
+</div>
+
+<div class="wrap" id="appWrap" style="display:none;">
 
   <header>
     <div>
@@ -723,21 +786,29 @@
 
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  const entregasRef = db.collection("entregas");
+
+  // entregasRef só é definido depois que a chave for validada com sucesso
+  // direto contra as regras do Firestore (veja o bloco de acesso, no final do script).
+  let entregasRef = null;
 
   let eventos = [];
   let anoAtual = 2026;
   let editingId = null;
+  let firestoreIniciado = false;
 
-  // Escuta mudanças em tempo real: qualquer criação/edição/exclusão feita por
-  // qualquer pessoa atualiza a tela na hora, sem precisar recarregar a página.
-  entregasRef.onSnapshot(snapshot => {
-    eventos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    renderCalendar();
-  }, error => {
-    console.error("Erro ao ler dados do Firestore:", error);
-    alert("Não foi possível conectar ao banco de dados. Verifique a configuração do Firebase.");
-  });
+  // Só começa a ler/escrever no Firestore depois que a chave de acesso for validada.
+  function iniciarFirestore(){
+    if (firestoreIniciado) return;
+    firestoreIniciado = true;
+
+    entregasRef.onSnapshot(snapshot => {
+      eventos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderCalendar();
+    }, error => {
+      console.error("Erro ao ler dados do Firestore:", error);
+      alert("Não foi possível conectar ao banco de dados. Verifique a configuração do Firebase.");
+    });
+  }
 
   // Filtro: todas as categorias ativas por padrão
   let filtroAtivo = new Set(["Consultoria Técnica", "Suporte e Fomento ao Crédito", "Consultoria e Suporte"]);
@@ -1244,6 +1315,68 @@
   document.getElementById("nextYear").addEventListener("click", () => { anoAtual++; renderCalendar(); });
 
   renderCalendar();
+
+  // ====== TELA DE ACESSO COM CHAVE ======
+  // A senha em si NUNCA fica no código-fonte. O que acontece:
+  // 1. Calculamos o hash SHA-256 do que a pessoa digitou (função genérica, não revela a senha).
+  // 2. Tentamos ler a coleção em "acesso/{hash}/entregas".
+  // 3. A regra do Firestore só libera essa leitura se o hash bater com o valor
+  //    correto, que existe SOMENTE dentro da regra publicada no Firebase — nunca aqui.
+  // Ou seja, quem é validado é o Firestore, não este arquivo.
+  const CHAVE_STORAGE_KEY = "calendario_acoes_hash_acesso";
+
+  async function sha256Hex(texto){
+    const codificado = new TextEncoder().encode(texto);
+    const bufferHash = await crypto.subtle.digest("SHA-256", codificado);
+    return Array.from(new Uint8Array(bufferHash))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+
+  function liberarAcesso(){
+    document.getElementById("accessGate").style.display = "none";
+    document.getElementById("appWrap").style.display = "block";
+    iniciarFirestore();
+  }
+
+  async function validarHash(hash){
+    const tentativaRef = db.collection("acesso").doc(hash).collection("entregas");
+    await tentativaRef.limit(1).get(); // se a regra rejeitar, isso lança um erro (permission-denied)
+    entregasRef = tentativaRef;
+    localStorage.setItem(CHAVE_STORAGE_KEY, hash);
+    liberarAcesso();
+  }
+
+  async function tentarAcesso(){
+    const valorDigitado = document.getElementById("accessKeyInput").value;
+    const btn = document.getElementById("accessKeyBtn");
+    btn.disabled = true;
+    document.getElementById("accessError").classList.remove("show");
+
+    try{
+      const hash = await sha256Hex(valorDigitado);
+      await validarHash(hash);
+    } catch(err){
+      console.error("Chave incorreta ou erro de acesso:", err);
+      document.getElementById("accessError").classList.add("show");
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  document.getElementById("accessKeyBtn").addEventListener("click", tentarAcesso);
+  document.getElementById("accessKeyInput").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") tentarAcesso();
+  });
+
+  // Se esse navegador já validou a chave antes, tenta de novo com o hash salvo
+  // (sem precisar redigitar) — mas ainda passa pela checagem real do Firestore.
+  const hashSalvo = localStorage.getItem(CHAVE_STORAGE_KEY);
+  if (hashSalvo){
+    validarHash(hashSalvo).catch(() => {
+      localStorage.removeItem(CHAVE_STORAGE_KEY);
+    });
+  }
 </script>
 </body>
 </html>
