@@ -687,6 +687,7 @@
         <button id="nextYear">›</button>
       </div>
       <button class="btn-primary" id="openModalBtn">+ Nova ação</button>
+      <button class="btn-ghost" id="logoutBtn" title="Sair e pedir a chave novamente">Sair</button>
     </div>
   </header>
 
@@ -795,13 +796,14 @@
   let anoAtual = 2026;
   let editingId = null;
   let firestoreIniciado = false;
+  let cancelarEscutaFirestore = null;
 
   // Só começa a ler/escrever no Firestore depois que a chave de acesso for validada.
   function iniciarFirestore(){
     if (firestoreIniciado) return;
     firestoreIniciado = true;
 
-    entregasRef.onSnapshot(snapshot => {
+    cancelarEscutaFirestore = entregasRef.onSnapshot(snapshot => {
       eventos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderCalendar();
     }, error => {
@@ -1338,6 +1340,29 @@
     document.getElementById("appWrap").style.display = "block";
     iniciarFirestore();
   }
+
+  function sair(){
+    if (cancelarEscutaFirestore){
+      cancelarEscutaFirestore(); // para de escutar o Firestore
+      cancelarEscutaFirestore = null;
+    }
+    firestoreIniciado = false;
+    entregasRef = null;
+    eventos = [];
+
+    localStorage.removeItem(CHAVE_STORAGE_KEY);
+
+    document.getElementById("accessKeyInput").value = "";
+    document.getElementById("accessError").classList.remove("show");
+    document.getElementById("appWrap").style.display = "none";
+    document.getElementById("accessGate").style.display = "flex";
+  }
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    if (confirm("Sair do Calendário de Ações? Você vai precisar digitar a chave de novo pra entrar.")){
+      sair();
+    }
+  });
 
   async function validarHash(hash){
     const tentativaRef = db.collection("acesso").doc(hash).collection("entregas");
