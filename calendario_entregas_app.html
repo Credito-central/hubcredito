@@ -312,6 +312,35 @@
     margin: 0 0 16px 0;
   }
 
+  .meta-popup{
+    position: relative;
+    max-width: 380px;
+  }
+  .meta-popup p{
+    font-size: 13.5px;
+    color: var(--ink);
+    line-height: 1.5;
+    white-space: pre-wrap;
+    margin: 0;
+  }
+  .popup-close{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: #EFF6F5;
+    color: var(--ink-soft);
+    border-radius: 50%;
+    font-size: 15px;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .popup-close:hover{ background: var(--pendente); color: #fff; }
+
   .field{ margin-bottom: 14px; }
   .field label{
     display:block;
@@ -705,6 +734,38 @@
   .tab-panel{ display:none; }
   .tab-panel.active{ display:block; }
 
+  .toolbar-extra{
+    display:flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    align-items:flex-end;
+    margin-bottom: 16px;
+  }
+  .toolbar-extra .field{
+    margin-bottom: 0;
+    min-width: 200px;
+  }
+  .toolbar-extra .field label{
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    display:block;
+    margin-bottom: 4px;
+  }
+  .toolbar-extra select{
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    color: var(--ink);
+    background: #fff;
+  }
+  .toolbar-extra .ms-trigger{ font-size: 12.5px; padding: 8px 10px; }
+
   /* Aba: Cadastrar eixo de atuação */
   .eixo-form-card{
     background: var(--panel);
@@ -728,6 +789,13 @@
     padding: 16px 18px;
     margin-bottom: 14px;
   }
+  .eixo-card-header{
+    display:flex;
+    justify-content: space-between;
+    align-items:flex-start;
+    gap: 10px;
+    margin-bottom: 4px;
+  }
   .eixo-card-titulo{
     font-family: var(--font-display);
     font-weight: 700;
@@ -735,6 +803,24 @@
     color: var(--teal-deep);
     margin: 0 0 12px;
   }
+  .eixo-card-acoes{
+    display:flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+  .eixo-editar-btn, .eixo-excluir-btn{
+    background: none;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 4px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--ink-soft);
+  }
+  .eixo-editar-btn:hover{ background: #EFF6F5; color: var(--teal-deep); }
+  .eixo-excluir-btn:hover{ background: var(--pendente-bg); color: var(--pendente); border-color: var(--pendente-bg); }
+
   .subitem-row{
     display:flex;
     align-items:flex-start;
@@ -751,6 +837,35 @@
     width: 34px;
   }
   .subitem-descricao{ flex: 1; color: var(--ink); line-height: 1.4; }
+  .subitem-acoes{
+    display:flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 6px;
+  }
+  .acao-chip{
+    display:inline-block;
+    background: #EFF6F5;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--teal-deep);
+    cursor: pointer;
+    width: fit-content;
+  }
+  .acao-chip:hover{ background: var(--realizado-bg); border-color: var(--realizado); }
+  .subitem-editar-btn, .subitem-excluir-btn{
+    background: none;
+    border: none;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--ink-soft);
+    flex-shrink: 0;
+    padding: 2px;
+  }
+  .subitem-editar-btn:hover{ color: var(--teal-deep); }
+  .subitem-excluir-btn:hover{ color: var(--pendente); }
   .subitem-check{
     flex-shrink: 0;
     font-size: 10.5px;
@@ -922,6 +1037,28 @@
     <span style="font-size:11.5px;color:var(--ink-soft);">Dê 2 cliques em um evento para editar</span>
   </div>
 
+  <div class="toolbar-extra" id="toolbarExtra">
+    <div class="field">
+      <label for="filtroEixoAtuacao">Eixo de atuação</label>
+      <select id="filtroEixoAtuacao">
+        <option value="">Todos</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="filtroSubitem">Subitem</label>
+      <select id="filtroSubitem">
+        <option value="">Todos</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Cooperativas participantes</label>
+      <div class="ms-wrap">
+        <button type="button" class="ms-trigger" id="filtroCooperativasTrigger">Todas as cooperativas</button>
+        <div class="ms-panel" id="filtroCooperativasPanel"></div>
+      </div>
+    </div>
+  </div>
+
   <div class="participant-filter-bar" id="participantFilterBar"></div>
 
   <div class="calendar" id="calendar"></div>
@@ -1040,6 +1177,10 @@
         </select>
       </div>
       <div class="field">
+        <label for="metaAcao">Meta</label>
+        <textarea id="metaAcao" placeholder="Qual é a meta desta ação?"></textarea>
+      </div>
+      <div class="field">
         <label>Cooperativas participantes</label>
         <div class="ms-wrap">
           <button type="button" class="ms-trigger" id="cooperativasTrigger">Selecionar cooperativas</button>
@@ -1054,6 +1195,15 @@
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<!-- Popup de Meta -->
+<div class="overlay" id="metaOverlay">
+  <div class="modal meta-popup">
+    <button type="button" class="popup-close" id="fecharMetaPopup" title="Fechar">×</button>
+    <h2>Meta</h2>
+    <p id="metaPopupTexto"></p>
   </div>
 </div>
 
@@ -1103,6 +1253,7 @@
     cancelarEscutaEixos = eixosAtuacaoRef.orderBy("numero", "asc").onSnapshot(snapshot => {
       eixosAtuacao = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       popularSelectEixoAtuacao();
+      popularFiltroEixoAtuacao();
       renderEixosAtuacao();
       atualizarIndicadores();
     }, error => {
@@ -1115,6 +1266,11 @@
 
   // Filtro por participante (foto): vazio = sem filtro, mostra todos os eventos
   let participantesFiltroAtivo = new Set();
+
+  // Filtros novos da Aba 1: eixo de atuação, subitem e cooperativas
+  let filtroEixoAtuacaoAtivo = "";
+  let filtroSubitemAtivo = "";
+  let filtroCooperativasAtivas = new Set();
 
   // Estrutura da equipe, usada pra popular o campo Participantes e os avatares/comentários
   const estrutura = {
@@ -1164,7 +1320,6 @@
   // aberta e quais têm o composer (formulário de novo comentário) aberto.
   const secoesAbertas = new Set();
   const composersAbertos = new Set();
-  const metaComposersAbertos = new Set();
 
   let participantesSelecionados = new Set();
 
@@ -1233,7 +1388,7 @@
   popularParticipantFilterBar();
 
   // Lista fixa de códigos de cooperativas participantes
-  const COOPERATIVAS = ["4042","4327","4054","4338","4222","4423","5042","5032","4310","5122","4446"];
+  const COOPERATIVAS = ["Interno","4042","4327","4054","4338","4222","4423","5042","5032","4310","5122","4446"];
   let cooperativasSelecionadas = new Set();
 
   function popularCooperativasPanel(){
@@ -1300,6 +1455,78 @@
     popularSelectSubitem(e.target.value, "");
   });
 
+  // ====== Filtros da Aba 1: eixo de atuação, subitem e cooperativas ======
+  function popularFiltroEixoAtuacao(){
+    const select = document.getElementById("filtroEixoAtuacao");
+    const valorAtual = select.value;
+    select.innerHTML = `<option value="">Todos</option>` +
+      eixosAtuacao.map(ex => `<option value="${ex.id}">${ex.numero}. ${escapeHtml(ex.titulo)}</option>`).join("");
+    select.value = valorAtual;
+  }
+
+  function popularFiltroSubitem(eixoAtuacaoId){
+    const select = document.getElementById("filtroSubitem");
+    const ex = eixosAtuacao.find(e => e.id === eixoAtuacaoId);
+    if (!ex || !ex.subitens || ex.subitens.length === 0){
+      select.innerHTML = `<option value="">Todos</option>`;
+      return;
+    }
+    select.innerHTML = `<option value="">Todos</option>` +
+      ex.subitens.map(s => `<option value="${s.codigo}">${s.codigo}</option>`).join("");
+  }
+
+  document.getElementById("filtroEixoAtuacao").addEventListener("change", (e) => {
+    filtroEixoAtuacaoAtivo = e.target.value;
+    filtroSubitemAtivo = "";
+    popularFiltroSubitem(filtroEixoAtuacaoAtivo);
+    renderCalendar();
+  });
+
+  document.getElementById("filtroSubitem").addEventListener("change", (e) => {
+    filtroSubitemAtivo = e.target.value;
+    renderCalendar();
+  });
+
+  function popularFiltroCooperativasPanel(){
+    const panel = document.getElementById("filtroCooperativasPanel");
+    panel.innerHTML = COOPERATIVAS.map(cod => `
+      <label class="ms-item">
+        <input type="checkbox" value="${cod}">
+        <span>${cod}</span>
+      </label>
+    `).join("");
+
+    panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) filtroCooperativasAtivas.add(chk.value);
+        else filtroCooperativasAtivas.delete(chk.value);
+        atualizarTriggerFiltroCooperativas();
+        renderCalendar();
+      });
+    });
+  }
+
+  function atualizarTriggerFiltroCooperativas(){
+    const trigger = document.getElementById("filtroCooperativasTrigger");
+    trigger.textContent = filtroCooperativasAtivas.size === 0
+      ? "Todas as cooperativas"
+      : Array.from(filtroCooperativasAtivas).join(", ");
+  }
+
+  popularFiltroCooperativasPanel();
+
+  document.getElementById("filtroCooperativasTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("filtroCooperativasPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("filtroCooperativasPanel");
+    const trigger = document.getElementById("filtroCooperativasTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
+  });
+
   document.getElementById("participantesTrigger").addEventListener("click", (e) => {
     e.stopPropagation();
     document.getElementById("participantesPanel").classList.toggle("open");
@@ -1341,7 +1568,10 @@
 
     const eventosFiltrados = eventos
       .filter(ev => filtroAtivo.has(ev.eixo))
-      .filter(ev => participantesFiltroAtivo.size === 0 || (ev.participantes || []).some(p => participantesFiltroAtivo.has(p)));
+      .filter(ev => participantesFiltroAtivo.size === 0 || (ev.participantes || []).some(p => participantesFiltroAtivo.has(p)))
+      .filter(ev => !filtroEixoAtuacaoAtivo || ev.eixoAtuacaoId === filtroEixoAtuacaoAtivo)
+      .filter(ev => !filtroSubitemAtivo || ev.subitemCodigo === filtroSubitemAtivo)
+      .filter(ev => filtroCooperativasAtivas.size === 0 || (ev.cooperativas || []).some(c => filtroCooperativasAtivas.has(c)));
 
     for (let m = 1; m <= 12; m++){
       const mesStr = String(m).padStart(2, "0");
@@ -1374,7 +1604,6 @@
           const participantes = item.participantes || [];
           const cooperativas = item.cooperativas || [];
           const comentarios = item.comentarios || [];
-          const metas = item.metas || [];
 
           const exVinculado = eixosAtuacao.find(e => e.id === item.eixoAtuacaoId);
           const subitemVinculado = exVinculado ? (exVinculado.subitens || []).find(s => s.codigo === item.subitemCodigo) : null;
@@ -1399,20 +1628,6 @@
               }).join("")}</div>`
             : "";
 
-          const metasHtml = metas.length
-            ? `<div class="meta-bubbles">${metas.map((meta, idx) => {
-                const p = participantePorNome(meta.autor);
-                const foto = p ? p.foto : "";
-                return `<div class="comment-bubble meta-bubble">
-                  <img class="bubble-photo" src="${foto}" alt="${escapeHtml(meta.autor)}" onerror="this.style.visibility='hidden'">
-                  <div class="bubble-text">
-                    <span class="bubble-author">🏆 ${escapeHtml(meta.autor)}</span>${escapeHtml(meta.texto)}
-                    <button type="button" class="meta-del-btn" data-event-id="${escapeHtml(item.id)}" data-meta-index="${idx}" title="Excluir meta alcançada">×</button>
-                  </div>
-                </div>`;
-              }).join("")}</div>`
-            : "";
-
           const bolhasHtml = comentarios.length
             ? `<div class="comment-bubbles">${comentarios.map((c, idx) => {
                 const p = participantePorNome(c.autor);
@@ -1429,7 +1644,6 @@
 
           const secaoAberta = secoesAbertas.has(item.id) ? "visible" : "";
           const composerAberto = composersAbertos.has(item.id) ? "open" : "";
-          const metaComposerAberto = metaComposersAbertos.has(item.id) ? "open" : "";
           const opcoesAutor = todosParticipantes().map(p => `<option value="${p.nome}">${p.nome}</option>`).join("");
 
           ev.innerHTML = `
@@ -1441,16 +1655,7 @@
             ${participantesTextoHtml}
             <div class="comment-section ${secaoAberta}" data-comment-section="${escapeHtml(item.id)}" draggable="false">
               ${avataresHtml}
-              ${metasHtml}
-              <button type="button" class="meta-toggle-btn" data-toggle-meta="${escapeHtml(item.id)}">🏆 Meta alcançada</button>
-              <div class="meta-composer ${metaComposerAberto}" data-meta-composer="${escapeHtml(item.id)}">
-                <select class="meta-autor" data-meta-autor-select="${escapeHtml(item.id)}">
-                  <option value="">Quem está registrando?</option>
-                  ${opcoesAutor}
-                </select>
-                <textarea class="meta-texto" data-meta-texto="${escapeHtml(item.id)}" placeholder="Descreva a meta alcançada..."></textarea>
-                <button type="button" class="meta-send" data-meta-send="${escapeHtml(item.id)}">Registrar meta</button>
-              </div>
+              <button type="button" class="meta-toggle-btn" data-ver-meta="${escapeHtml(item.id)}">🏆 Meta</button>
               ${bolhasHtml}
               <button type="button" class="comment-toggle-btn" data-toggle-composer="${escapeHtml(item.id)}">+ Comentário</button>
               <div class="comment-composer ${composerAberto}" data-composer="${escapeHtml(item.id)}">
@@ -1551,55 +1756,12 @@
       });
     });
 
-    document.querySelectorAll("[data-toggle-meta]").forEach(btn => {
+    document.querySelectorAll("[data-ver-meta]").forEach(btn => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        const id = btn.getAttribute("data-toggle-meta");
-        if (metaComposersAbertos.has(id)) metaComposersAbertos.delete(id);
-        else metaComposersAbertos.add(id);
-        renderCalendar();
-      });
-    });
-
-    document.querySelectorAll(".meta-send").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute("data-meta-send");
-        const autorSelect = document.querySelector(`[data-meta-autor-select="${id}"]`);
-        const textoArea = document.querySelector(`[data-meta-texto="${id}"]`);
-        const autor = autorSelect.value;
-        const texto = textoArea.value.trim();
-        if (!autor || !texto){
-          alert("Selecione quem está registrando e descreva a meta alcançada.");
-          return;
-        }
-        const novaMeta = { autor, texto, ts: new Date().toISOString() };
-        entregasRef.doc(id).update({
-          metas: firebase.firestore.FieldValue.arrayUnion(novaMeta)
-        }).catch(err => {
-          console.error("Erro ao salvar meta alcançada:", err);
-          alert("Não foi possível salvar a meta alcançada.");
-        });
-      });
-    });
-
-    document.querySelectorAll(".meta-del-btn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const eventId = btn.getAttribute("data-event-id");
-        const idx = Number(btn.getAttribute("data-meta-index"));
-        const evento = eventos.find(ev => ev.id === eventId);
-        if (!evento || !evento.metas || !evento.metas[idx]) return;
-
-        const metaParaRemover = evento.metas[idx];
-        if (confirm("Excluir esta meta alcançada?")){
-          entregasRef.doc(eventId).update({
-            metas: firebase.firestore.FieldValue.arrayRemove(metaParaRemover)
-          }).catch(err => {
-            console.error("Erro ao excluir meta alcançada:", err);
-            alert("Não foi possível excluir a meta alcançada.");
-          });
-        }
+        const id = btn.getAttribute("data-ver-meta");
+        const evento = eventos.find(ev => ev.id === id);
+        abrirPopupMeta(evento ? evento.meta : "");
       });
     });
 
@@ -1688,6 +1850,21 @@
   const submitBtn = document.getElementById("submitBtn");
   const deleteFromModalBtn = document.getElementById("deleteFromModalBtn");
 
+  // ====== POPUP DE META ======
+  function abrirPopupMeta(texto){
+    document.getElementById("metaPopupTexto").textContent = texto && texto.trim()
+      ? texto
+      : "Nenhuma meta definida para esta ação.";
+    document.getElementById("metaOverlay").classList.add("open");
+  }
+
+  document.getElementById("fecharMetaPopup").addEventListener("click", () => {
+    document.getElementById("metaOverlay").classList.remove("open");
+  });
+  document.getElementById("metaOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "metaOverlay") document.getElementById("metaOverlay").classList.remove("open");
+  });
+
   function abrirModalNovo(){
     editingId = null;
     modalTitle.textContent = "Nova ação";
@@ -1721,6 +1898,7 @@
     document.getElementById("entrega").value = item.entrega;
     document.getElementById("status").value = item.status;
     document.getElementById("mes").value = item.mesNum;
+    document.getElementById("metaAcao").value = item.meta || "";
 
     participantesSelecionados = new Set(item.participantes || []);
     document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => {
@@ -1765,6 +1943,7 @@
       status: document.getElementById("status").value,
       eixoAtuacaoId: document.getElementById("eixoAtuacao").value || null,
       subitemCodigo: document.getElementById("subitemCodigo").value || null,
+      meta: document.getElementById("metaAcao").value.trim(),
       participantes: Array.from(participantesSelecionados),
       cooperativas: Array.from(cooperativasSelecionadas),
       ano: anoAtual,
@@ -1844,18 +2023,38 @@
       const linhasSubitens = subitens.map(s => {
         const ligados = eventosLigadosAoSubitem(ex.id, s.codigo);
         const temRealizado = ligados.some(ev => ev.status === "Realizado");
+
+        const listaAcoesHtml = ligados.length
+          ? `<div class="subitem-acoes">${ligados.map(ev => `
+              <span class="acao-chip" data-editar-acao="${escapeHtml(ev.id)}" title="Clique para editar">
+                ${escapeHtml(ev.entrega)}${ev.meta ? ` — Meta: ${escapeHtml(ev.meta)}` : ""}
+              </span>
+            `).join("")}</div>`
+          : "";
+
         return `
           <div class="subitem-row">
             <span class="subitem-codigo">${escapeHtml(s.codigo)}</span>
-            <span class="subitem-descricao">${escapeHtml(s.descricao)}</span>
+            <div class="subitem-descricao">
+              ${escapeHtml(s.descricao)}
+              ${listaAcoesHtml}
+            </div>
             <span class="subitem-check ${temRealizado ? "ok" : "pendente"}">${temRealizado ? "✓ Realizado" : "Pendente"}</span>
+            <button type="button" class="subitem-editar-btn" data-editar-subitem="${ex.id}" data-codigo-subitem="${escapeHtml(s.codigo)}" title="Editar subitem">✎</button>
+            <button type="button" class="subitem-excluir-btn" data-excluir-subitem="${ex.id}" data-codigo-subitem="${escapeHtml(s.codigo)}" title="Excluir subitem">🗑</button>
           </div>
         `;
       }).join("");
 
       return `
         <div class="eixo-card" style="border-left-color:${ex.cor || "#00AE9D"};">
-          <p class="eixo-card-titulo">${ex.numero}. ${escapeHtml(ex.titulo)}</p>
+          <div class="eixo-card-header">
+            <p class="eixo-card-titulo">${ex.numero}. ${escapeHtml(ex.titulo)}</p>
+            <div class="eixo-card-acoes">
+              <button type="button" class="eixo-editar-btn" data-editar-eixo="${ex.id}" title="Editar eixo de atuação">✎ Editar</button>
+              <button type="button" class="eixo-excluir-btn" data-excluir-eixo="${ex.id}" title="Excluir eixo de atuação">🗑 Excluir</button>
+            </div>
+          </div>
           ${linhasSubitens || `<p style="color:var(--ink-soft);font-size:12px;">Nenhum subitem cadastrado ainda.</p>`}
           <div class="novo-subitem-row">
             <input type="text" class="codigo-input" placeholder="${ex.numero}.${subitens.length + 1}" data-novo-subitem-codigo="${ex.id}">
@@ -1883,6 +2082,83 @@
           console.error("Erro ao adicionar subitem:", err);
           alert("Não foi possível adicionar o subitem.");
         });
+      });
+    });
+
+    document.querySelectorAll("[data-editar-eixo]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const exId = btn.getAttribute("data-editar-eixo");
+        const ex = eixosAtuacao.find(e => e.id === exId);
+        if (!ex) return;
+        const novoTitulo = prompt("Novo título do eixo de atuação:", ex.titulo);
+        if (novoTitulo === null || !novoTitulo.trim()) return;
+        const novaCor = prompt("Nova cor (código hexadecimal, ex: #00AE9D):", ex.cor || "#00AE9D");
+        const dadosAtualizados = { titulo: novoTitulo.trim() };
+        if (novaCor && novaCor.trim()) dadosAtualizados.cor = novaCor.trim();
+        eixosAtuacaoRef.doc(exId).update(dadosAtualizados).catch(err => {
+          console.error("Erro ao editar eixo de atuação:", err);
+          alert("Não foi possível editar o eixo de atuação.");
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-excluir-eixo]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const exId = btn.getAttribute("data-excluir-eixo");
+        if (confirm("Excluir este eixo de atuação e todos os seus subitens? Ações já cadastradas que apontam para ele deixarão de mostrar essa vinculação.")){
+          eixosAtuacaoRef.doc(exId).delete().catch(err => {
+            console.error("Erro ao excluir eixo de atuação:", err);
+            alert("Não foi possível excluir o eixo de atuação.");
+          });
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-editar-subitem]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const exId = btn.getAttribute("data-editar-subitem");
+        const codigoAtual = btn.getAttribute("data-codigo-subitem");
+        const ex = eixosAtuacao.find(e => e.id === exId);
+        if (!ex) return;
+        const subitem = (ex.subitens || []).find(s => s.codigo === codigoAtual);
+        if (!subitem) return;
+
+        const novoCodigo = prompt("Código do subitem:", subitem.codigo);
+        if (novoCodigo === null || !novoCodigo.trim()) return;
+        const novaDescricao = prompt("Descrição do subitem:", subitem.descricao);
+        if (novaDescricao === null || !novaDescricao.trim()) return;
+
+        const novosSubitens = ex.subitens.map(s =>
+          s.codigo === codigoAtual ? { codigo: novoCodigo.trim(), descricao: novaDescricao.trim() } : s
+        );
+
+        eixosAtuacaoRef.doc(exId).update({ subitens: novosSubitens }).catch(err => {
+          console.error("Erro ao editar subitem:", err);
+          alert("Não foi possível editar o subitem.");
+        });
+      });
+    });
+
+    document.querySelectorAll("[data-excluir-subitem]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const exId = btn.getAttribute("data-excluir-subitem");
+        const codigo = btn.getAttribute("data-codigo-subitem");
+        const ex = eixosAtuacao.find(e => e.id === exId);
+        if (!ex) return;
+
+        if (confirm(`Excluir o subitem ${codigo}? Ações já vinculadas a ele deixarão de mostrar essa vinculação.`)){
+          const novosSubitens = (ex.subitens || []).filter(s => s.codigo !== codigo);
+          eixosAtuacaoRef.doc(exId).update({ subitens: novosSubitens }).catch(err => {
+            console.error("Erro ao excluir subitem:", err);
+            alert("Não foi possível excluir o subitem.");
+          });
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-editar-acao]").forEach(chip => {
+      chip.addEventListener("click", () => {
+        abrirModalEdicao(chip.getAttribute("data-editar-acao"));
       });
     });
   }
