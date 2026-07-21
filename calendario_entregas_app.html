@@ -6,6 +6,7 @@
 <title>Calendário de Ações — Crédito Central 2016</title>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 <style>
   :root{
     --bg: #F4F7F7;
@@ -512,6 +513,25 @@
     padding: 0;
   }
   .comment-del-btn:hover{ background: var(--pendente); color: #fff; }
+  .meta-del-btn{
+    position: absolute;
+    top: 3px;
+    right: 4px;
+    width: 14px;
+    height: 14px;
+    border: none;
+    background: rgba(11,46,44,0.08);
+    color: var(--ink-soft);
+    border-radius: 4px;
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding: 0;
+  }
+  .meta-del-btn:hover{ background: var(--pendente); color: #fff; }
 
   .comment-toggle-btn{
     background: transparent;
@@ -525,6 +545,61 @@
     cursor: pointer;
   }
   .comment-toggle-btn:hover{ background: #EFF6F5; border-color: var(--teal); }
+
+  .meta-toggle-btn{
+    background: transparent;
+    border: 1px dashed #C98A1B;
+    color: #8A6116;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 10.5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    margin-bottom: 6px;
+  }
+  .meta-toggle-btn:hover{ background: var(--andamento-bg); }
+  .meta-bubbles{
+    display:flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .meta-bubble .bubble-text{
+    background: var(--andamento-bg);
+    border-color: #E8C68A;
+  }
+  .meta-bubble .bubble-author{ color: #8A6116; }
+  .meta-composer{
+    display:none;
+    margin-bottom: 8px;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .meta-composer.open{ display:flex; }
+  .meta-composer select, .meta-composer textarea{
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    color: var(--ink);
+    background: #fff;
+  }
+  .meta-composer textarea{ min-height: 42px; resize: vertical; }
+  .meta-send{
+    align-self: flex-end;
+    padding: 6px 12px;
+    font-size: 11.5px;
+    background: #C98A1B;
+    border: none;
+    color: #fff;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .meta-send:hover{ background: #8A6116; }
 
   .comment-composer{
     display:none;
@@ -602,6 +677,145 @@
     box-shadow: 0 0 0 3px rgba(0,174,157,0.18);
   }
   .participant-filter-btn.active .avatar-label{ color: var(--teal-deep); }
+
+  /* Navegação por abas */
+  .tab-nav{
+    display:flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .tab-btn{
+    background: none;
+    border: none;
+    padding: 10px 16px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover{ color: var(--teal-deep); }
+  .tab-btn.active{
+    color: var(--teal-deep);
+    border-bottom-color: var(--teal-deep);
+  }
+  .tab-panel{ display:none; }
+  .tab-panel.active{ display:block; }
+
+  /* Aba: Cadastrar eixo de atuação */
+  .eixo-form-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .eixo-form-card h2{
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--teal-deep);
+    margin: 0 0 14px;
+  }
+
+  .eixo-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-left: 6px solid var(--teal);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .eixo-card-titulo{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 14.5px;
+    color: var(--teal-deep);
+    margin: 0 0 12px;
+  }
+  .subitem-row{
+    display:flex;
+    align-items:flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px dashed var(--line);
+    font-size: 12.5px;
+  }
+  .subitem-row:first-of-type{ border-top: none; }
+  .subitem-codigo{
+    font-weight: 700;
+    color: var(--ink);
+    flex-shrink: 0;
+    width: 34px;
+  }
+  .subitem-descricao{ flex: 1; color: var(--ink); line-height: 1.4; }
+  .subitem-check{
+    flex-shrink: 0;
+    font-size: 10.5px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+  .subitem-check.ok{ background: var(--realizado-bg); color: var(--realizado); }
+  .subitem-check.pendente{ background: #EFF6F5; color: var(--ink-soft); }
+
+  .novo-subitem-row{
+    display:flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .novo-subitem-row input{
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 6px 8px;
+    font-size: 12px;
+    font-family: var(--font-body);
+  }
+  .novo-subitem-row input.codigo-input{ width: 60px; }
+  .novo-subitem-row input.descricao-input{ flex: 1; }
+  .novo-subitem-row button{
+    background: var(--teal-deep);
+    color: #fff;
+    border: none;
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Aba: Indicadores */
+  .indicador-card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+  .indicador-card h2{
+    font-family: var(--font-display);
+    font-size: 15px;
+    color: var(--teal-deep);
+    margin: 0 0 14px;
+  }
+  .indicador-table{
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  .indicador-table th, .indicador-table td{
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    text-align: left;
+  }
+  .indicador-table th{
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+  }
 
   /* Tela de acesso com chave */
   .access-gate{
@@ -691,11 +905,19 @@
     </div>
   </header>
 
+  <div class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="tabCalendario">Calendário</button>
+    <button class="tab-btn" data-tab="tabEixos">Cadastrar eixo de atuação</button>
+    <button class="tab-btn" data-tab="tabIndicadores">Indicadores</button>
+  </div>
+
+  <div class="tab-panel active" id="tabCalendario">
+
   <div class="toolbar">
     <div class="filter-bar" id="filterBar">
-      <button class="filter-btn active" data-eixo="Consultoria Técnica">Consultoria Técnica</button>
-      <button class="filter-btn active" data-eixo="Suporte e Fomento ao Crédito">Suporte e Fomento ao Crédito</button>
-      <button class="filter-btn active" data-eixo="Consultoria e Suporte">Consultoria e Suporte</button>
+      <button class="filter-btn active" data-eixo="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</button>
+      <button class="filter-btn active" data-eixo="Gestão do Crédito">Gestão do Crédito</button>
+      <button class="filter-btn active" data-eixo="Ambos">Ambos</button>
     </div>
     <span style="font-size:11.5px;color:var(--ink-soft);">Dê 2 cliques em um evento para editar</span>
   </div>
@@ -703,6 +925,53 @@
   <div class="participant-filter-bar" id="participantFilterBar"></div>
 
   <div class="calendar" id="calendar"></div>
+
+  </div>
+
+  <div class="tab-panel" id="tabEixos">
+    <div class="eixo-form-card">
+      <h2>Novo eixo de atuação</h2>
+      <div class="field-row">
+        <div class="field" style="flex:2;">
+          <label for="novoEixoTitulo">Título do eixo</label>
+          <input type="text" id="novoEixoTitulo" placeholder="Ex: Gestão Preditiva e Automação de Processos">
+        </div>
+        <div class="field">
+          <label for="novoEixoCor">Cor</label>
+          <input type="color" id="novoEixoCor" value="#00AE9D">
+        </div>
+      </div>
+      <button type="button" class="btn-primary" id="criarEixoBtn">+ Cadastrar eixo de atuação</button>
+    </div>
+
+    <div id="listaEixosAtuacao"></div>
+  </div>
+
+  <div class="tab-panel" id="tabIndicadores">
+    <div class="indicador-card">
+      <h2>Ações por mês e status</h2>
+      <div class="field" style="max-width:280px;">
+        <label for="filtroEixoGrafico">Filtrar por Eixo</label>
+        <select id="filtroEixoGrafico">
+          <option value="todos">Todos os eixos</option>
+          <option value="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</option>
+          <option value="Gestão do Crédito">Gestão do Crédito</option>
+          <option value="Ambos">Ambos</option>
+        </select>
+      </div>
+      <canvas id="graficoStatusMes" height="90"></canvas>
+    </div>
+
+    <div class="indicador-card">
+      <h2>Ações por participante</h2>
+      <div id="tabelaParticipantes"></div>
+    </div>
+
+    <div class="indicador-card">
+      <h2>Ações por eixo de atuação</h2>
+      <div id="tabelaEixosAtuacao"></div>
+    </div>
+  </div>
 
   <footer>Elaborado pela área de crédito</footer>
 </div>
@@ -715,9 +984,9 @@
       <div class="field">
         <label for="eixo">Eixo</label>
         <select id="eixo" required>
-          <option value="Consultoria Técnica">Consultoria Técnica</option>
-          <option value="Suporte e Fomento ao Crédito">Suporte e Fomento ao Crédito</option>
-          <option value="Consultoria e Suporte">Consultoria e Suporte</option>
+          <option value="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</option>
+          <option value="Gestão do Crédito">Gestão do Crédito</option>
+          <option value="Ambos">Ambos</option>
         </select>
       </div>
       <div class="field">
@@ -759,8 +1028,23 @@
         </div>
       </div>
       <div class="field">
-        <label for="detalhes">Detalhes</label>
-        <textarea id="detalhes" placeholder="Descrição curta da entrega"></textarea>
+        <label for="eixoAtuacao">Eixo de atuação</label>
+        <select id="eixoAtuacao">
+          <option value="">Selecione um eixo de atuação</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="subitemCodigo">Subitem</label>
+        <select id="subitemCodigo">
+          <option value="">Selecione o eixo de atuação primeiro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Cooperativas participantes</label>
+        <div class="ms-wrap">
+          <button type="button" class="ms-trigger" id="cooperativasTrigger">Selecionar cooperativas</button>
+          <div class="ms-panel" id="cooperativasPanel"></div>
+        </div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-danger" id="deleteFromModalBtn" style="display:none;">Excluir</button>
@@ -788,15 +1072,18 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // entregasRef só é definido depois que a chave for validada com sucesso
+  // entregasRef e eixosAtuacaoRef só são definidos depois que a chave for validada com sucesso
   // direto contra as regras do Firestore (veja o bloco de acesso, no final do script).
   let entregasRef = null;
+  let eixosAtuacaoRef = null;
 
   let eventos = [];
+  let eixosAtuacao = [];
   let anoAtual = 2026;
   let editingId = null;
   let firestoreIniciado = false;
   let cancelarEscutaFirestore = null;
+  let cancelarEscutaEixos = null;
 
   // Só começa a ler/escrever no Firestore depois que a chave de acesso for validada.
   function iniciarFirestore(){
@@ -806,14 +1093,25 @@
     cancelarEscutaFirestore = entregasRef.onSnapshot(snapshot => {
       eventos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       renderCalendar();
+      renderEixosAtuacao();
+      atualizarIndicadores();
     }, error => {
       console.error("Erro ao ler dados do Firestore:", error);
       alert("Não foi possível conectar ao banco de dados. Verifique a configuração do Firebase.");
     });
+
+    cancelarEscutaEixos = eixosAtuacaoRef.orderBy("numero", "asc").onSnapshot(snapshot => {
+      eixosAtuacao = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      popularSelectEixoAtuacao();
+      renderEixosAtuacao();
+      atualizarIndicadores();
+    }, error => {
+      console.error("Erro ao ler eixos de atuação:", error);
+    });
   }
 
   // Filtro: todas as categorias ativas por padrão
-  let filtroAtivo = new Set(["Consultoria Técnica", "Suporte e Fomento ao Crédito", "Consultoria e Suporte"]);
+  let filtroAtivo = new Set(["Apoio aos Produtos de Crédito", "Gestão do Crédito", "Ambos"]);
 
   // Filtro por participante (foto): vazio = sem filtro, mostra todos os eventos
   let participantesFiltroAtivo = new Set();
@@ -866,6 +1164,7 @@
   // aberta e quais têm o composer (formulário de novo comentário) aberto.
   const secoesAbertas = new Set();
   const composersAbertos = new Set();
+  const metaComposersAbertos = new Set();
 
   let participantesSelecionados = new Set();
 
@@ -932,6 +1231,74 @@
   }
 
   popularParticipantFilterBar();
+
+  // Lista fixa de códigos de cooperativas participantes
+  const COOPERATIVAS = ["4042","4327","4054","4338","4222","4423","5042","5032","4310","5122","4446"];
+  let cooperativasSelecionadas = new Set();
+
+  function popularCooperativasPanel(){
+    const panel = document.getElementById("cooperativasPanel");
+    panel.innerHTML = COOPERATIVAS.map(cod => `
+      <label class="ms-item">
+        <input type="checkbox" value="${cod}">
+        <span>${cod}</span>
+      </label>
+    `).join("");
+
+    panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) cooperativasSelecionadas.add(chk.value);
+        else cooperativasSelecionadas.delete(chk.value);
+        atualizarTriggerCooperativas();
+      });
+    });
+  }
+
+  function atualizarTriggerCooperativas(){
+    const trigger = document.getElementById("cooperativasTrigger");
+    trigger.textContent = cooperativasSelecionadas.size === 0
+      ? "Selecionar cooperativas"
+      : Array.from(cooperativasSelecionadas).join(", ");
+  }
+
+  popularCooperativasPanel();
+
+  document.getElementById("cooperativasTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("cooperativasPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("cooperativasPanel");
+    const trigger = document.getElementById("cooperativasTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
+  });
+
+  // ====== Eixo de atuação e Subitem (dependente) no formulário ======
+  function popularSelectEixoAtuacao(){
+    const select = document.getElementById("eixoAtuacao");
+    const valorAtual = select.value;
+    select.innerHTML = `<option value="">Selecione um eixo de atuação</option>` +
+      eixosAtuacao.map(ex => `<option value="${ex.id}">${ex.numero}. ${escapeHtml(ex.titulo)}</option>`).join("");
+    select.value = valorAtual;
+  }
+
+  function popularSelectSubitem(eixoAtuacaoId, subitemSelecionado){
+    const select = document.getElementById("subitemCodigo");
+    const ex = eixosAtuacao.find(e => e.id === eixoAtuacaoId);
+    if (!ex || !ex.subitens || ex.subitens.length === 0){
+      select.innerHTML = `<option value="">Selecione o eixo de atuação primeiro</option>`;
+      return;
+    }
+    select.innerHTML = `<option value="">Selecione o subitem</option>` +
+      ex.subitens.map(s => `<option value="${s.codigo}">${s.codigo} — ${escapeHtml(s.descricao).slice(0, 70)}${s.descricao.length > 70 ? "…" : ""}</option>`).join("");
+    if (subitemSelecionado) select.value = subitemSelecionado;
+  }
+
+  document.getElementById("eixoAtuacao").addEventListener("change", (e) => {
+    popularSelectSubitem(e.target.value, "");
+  });
 
   document.getElementById("participantesTrigger").addEventListener("click", (e) => {
     e.stopPropagation();
@@ -1005,7 +1372,20 @@
           ev.setAttribute("draggable", "true");
 
           const participantes = item.participantes || [];
+          const cooperativas = item.cooperativas || [];
           const comentarios = item.comentarios || [];
+          const metas = item.metas || [];
+
+          const exVinculado = eixosAtuacao.find(e => e.id === item.eixoAtuacaoId);
+          const subitemVinculado = exVinculado ? (exVinculado.subitens || []).find(s => s.codigo === item.subitemCodigo) : null;
+
+          const eixoAtuacaoHtml = exVinculado
+            ? `<span class="detalhes" title="${subitemVinculado ? escapeHtml(subitemVinculado.descricao) : ""}" style="border-left:3px solid ${exVinculado.cor || "#00AE9D"};padding-left:6px;">${exVinculado.numero}. ${escapeHtml(exVinculado.titulo)}${item.subitemCodigo ? " (" + escapeHtml(item.subitemCodigo) + ")" : ""}</span>`
+            : "";
+
+          const cooperativasTextoHtml = cooperativas.length
+            ? `<span class="detalhes">Cooperativas: ${cooperativas.map(c => escapeHtml(c)).join(", ")}</span>`
+            : "";
 
           const participantesTextoHtml = participantes.length
             ? `<span class="detalhes">Participantes: ${participantes.map(n => escapeHtml(n)).join(", ")}</span>`
@@ -1016,6 +1396,20 @@
                 const p = participantePorNome(nome);
                 const foto = p ? p.foto : "";
                 return `<img class="avatar-mini" src="${foto}" alt="${escapeHtml(nome)}" title="${escapeHtml(nome)}" onerror="this.style.visibility='hidden'">`;
+              }).join("")}</div>`
+            : "";
+
+          const metasHtml = metas.length
+            ? `<div class="meta-bubbles">${metas.map((meta, idx) => {
+                const p = participantePorNome(meta.autor);
+                const foto = p ? p.foto : "";
+                return `<div class="comment-bubble meta-bubble">
+                  <img class="bubble-photo" src="${foto}" alt="${escapeHtml(meta.autor)}" onerror="this.style.visibility='hidden'">
+                  <div class="bubble-text">
+                    <span class="bubble-author">🏆 ${escapeHtml(meta.autor)}</span>${escapeHtml(meta.texto)}
+                    <button type="button" class="meta-del-btn" data-event-id="${escapeHtml(item.id)}" data-meta-index="${idx}" title="Excluir meta alcançada">×</button>
+                  </div>
+                </div>`;
               }).join("")}</div>`
             : "";
 
@@ -1035,16 +1429,28 @@
 
           const secaoAberta = secoesAbertas.has(item.id) ? "visible" : "";
           const composerAberto = composersAbertos.has(item.id) ? "open" : "";
+          const metaComposerAberto = metaComposersAbertos.has(item.id) ? "open" : "";
           const opcoesAutor = todosParticipantes().map(p => `<option value="${p.nome}">${p.nome}</option>`).join("");
 
           ev.innerHTML = `
             <button class="del-btn" data-id="${escapeHtml(item.id)}" title="Excluir evento">×</button>
             <span class="eixo-tag">${escapeHtml(item.eixo)}</span>
             <span class="titulo">${escapeHtml(item.entrega)}</span>
-            ${item.detalhes ? `<span class="detalhes">${escapeHtml(item.detalhes)}</span>` : ""}
+            ${eixoAtuacaoHtml}
+            ${cooperativasTextoHtml}
             ${participantesTextoHtml}
             <div class="comment-section ${secaoAberta}" data-comment-section="${escapeHtml(item.id)}" draggable="false">
               ${avataresHtml}
+              ${metasHtml}
+              <button type="button" class="meta-toggle-btn" data-toggle-meta="${escapeHtml(item.id)}">🏆 Meta alcançada</button>
+              <div class="meta-composer ${metaComposerAberto}" data-meta-composer="${escapeHtml(item.id)}">
+                <select class="meta-autor" data-meta-autor-select="${escapeHtml(item.id)}">
+                  <option value="">Quem está registrando?</option>
+                  ${opcoesAutor}
+                </select>
+                <textarea class="meta-texto" data-meta-texto="${escapeHtml(item.id)}" placeholder="Descreva a meta alcançada..."></textarea>
+                <button type="button" class="meta-send" data-meta-send="${escapeHtml(item.id)}">Registrar meta</button>
+              </div>
               ${bolhasHtml}
               <button type="button" class="comment-toggle-btn" data-toggle-composer="${escapeHtml(item.id)}">+ Comentário</button>
               <div class="comment-composer ${composerAberto}" data-composer="${escapeHtml(item.id)}">
@@ -1140,6 +1546,58 @@
           }).catch(err => {
             console.error("Erro ao excluir comentário:", err);
             alert("Não foi possível excluir o comentário.");
+          });
+        }
+      });
+    });
+
+    document.querySelectorAll("[data-toggle-meta]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute("data-toggle-meta");
+        if (metaComposersAbertos.has(id)) metaComposersAbertos.delete(id);
+        else metaComposersAbertos.add(id);
+        renderCalendar();
+      });
+    });
+
+    document.querySelectorAll(".meta-send").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute("data-meta-send");
+        const autorSelect = document.querySelector(`[data-meta-autor-select="${id}"]`);
+        const textoArea = document.querySelector(`[data-meta-texto="${id}"]`);
+        const autor = autorSelect.value;
+        const texto = textoArea.value.trim();
+        if (!autor || !texto){
+          alert("Selecione quem está registrando e descreva a meta alcançada.");
+          return;
+        }
+        const novaMeta = { autor, texto, ts: new Date().toISOString() };
+        entregasRef.doc(id).update({
+          metas: firebase.firestore.FieldValue.arrayUnion(novaMeta)
+        }).catch(err => {
+          console.error("Erro ao salvar meta alcançada:", err);
+          alert("Não foi possível salvar a meta alcançada.");
+        });
+      });
+    });
+
+    document.querySelectorAll(".meta-del-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const eventId = btn.getAttribute("data-event-id");
+        const idx = Number(btn.getAttribute("data-meta-index"));
+        const evento = eventos.find(ev => ev.id === eventId);
+        if (!evento || !evento.metas || !evento.metas[idx]) return;
+
+        const metaParaRemover = evento.metas[idx];
+        if (confirm("Excluir esta meta alcançada?")){
+          entregasRef.doc(eventId).update({
+            metas: firebase.firestore.FieldValue.arrayRemove(metaParaRemover)
+          }).catch(err => {
+            console.error("Erro ao excluir meta alcançada:", err);
+            alert("Não foi possível excluir a meta alcançada.");
           });
         }
       });
@@ -1241,6 +1699,13 @@
     document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => chk.checked = false);
     atualizarTriggerParticipantes();
 
+    cooperativasSelecionadas = new Set();
+    document.querySelectorAll("#cooperativasPanel input[type='checkbox']").forEach(chk => chk.checked = false);
+    atualizarTriggerCooperativas();
+
+    document.getElementById("eixoAtuacao").value = "";
+    popularSelectSubitem("");
+
     overlay.classList.add("open");
   }
 
@@ -1256,13 +1721,21 @@
     document.getElementById("entrega").value = item.entrega;
     document.getElementById("status").value = item.status;
     document.getElementById("mes").value = item.mesNum;
-    document.getElementById("detalhes").value = item.detalhes || "";
 
     participantesSelecionados = new Set(item.participantes || []);
     document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => {
       chk.checked = participantesSelecionados.has(chk.value);
     });
     atualizarTriggerParticipantes();
+
+    cooperativasSelecionadas = new Set(item.cooperativas || []);
+    document.querySelectorAll("#cooperativasPanel input[type='checkbox']").forEach(chk => {
+      chk.checked = cooperativasSelecionadas.has(chk.value);
+    });
+    atualizarTriggerCooperativas();
+
+    document.getElementById("eixoAtuacao").value = item.eixoAtuacaoId || "";
+    popularSelectSubitem(item.eixoAtuacaoId || "", item.subitemCodigo || "");
 
     overlay.classList.add("open");
   }
@@ -1290,8 +1763,10 @@
       eixo: document.getElementById("eixo").value,
       entrega: document.getElementById("entrega").value.trim(),
       status: document.getElementById("status").value,
-      detalhes: document.getElementById("detalhes").value.trim(),
+      eixoAtuacaoId: document.getElementById("eixoAtuacao").value || null,
+      subitemCodigo: document.getElementById("subitemCodigo").value || null,
       participantes: Array.from(participantesSelecionados),
+      cooperativas: Array.from(cooperativasSelecionadas),
       ano: anoAtual,
       mesNum: document.getElementById("mes").value
     };
@@ -1317,6 +1792,235 @@
   document.getElementById("nextYear").addEventListener("click", () => { anoAtual++; renderCalendar(); });
 
   renderCalendar();
+
+  // ====== NAVEGAÇÃO POR ABAS ======
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById(btn.getAttribute("data-tab")).classList.add("active");
+
+      if (btn.getAttribute("data-tab") === "tabIndicadores"){
+        atualizarIndicadores();
+      }
+    });
+  });
+
+  // ====== ABA 2: CADASTRAR EIXO DE ATUAÇÃO ======
+  document.getElementById("criarEixoBtn").addEventListener("click", () => {
+    const titulo = document.getElementById("novoEixoTitulo").value.trim();
+    const cor = document.getElementById("novoEixoCor").value;
+    if (!titulo){
+      alert("Digite o título do eixo de atuação.");
+      return;
+    }
+    const numero = eixosAtuacao.length + 1;
+    eixosAtuacaoRef.add({ titulo, numero, cor, subitens: [] })
+      .then(() => {
+        document.getElementById("novoEixoTitulo").value = "";
+      })
+      .catch(err => {
+        console.error("Erro ao criar eixo de atuação:", err);
+        alert("Não foi possível criar o eixo de atuação.");
+      });
+  });
+
+  function eventosLigadosAoSubitem(eixoAtuacaoId, codigo){
+    return eventos.filter(ev => ev.eixoAtuacaoId === eixoAtuacaoId && ev.subitemCodigo === codigo);
+  }
+
+  function renderEixosAtuacao(){
+    const container = document.getElementById("listaEixosAtuacao");
+    if (!container) return;
+
+    if (eixosAtuacao.length === 0){
+      container.innerHTML = `<p style="color:var(--ink-soft);font-size:12.5px;">Nenhum eixo de atuação cadastrado ainda.</p>`;
+      return;
+    }
+
+    container.innerHTML = eixosAtuacao.map(ex => {
+      const subitens = ex.subitens || [];
+      const linhasSubitens = subitens.map(s => {
+        const ligados = eventosLigadosAoSubitem(ex.id, s.codigo);
+        const temRealizado = ligados.some(ev => ev.status === "Realizado");
+        return `
+          <div class="subitem-row">
+            <span class="subitem-codigo">${escapeHtml(s.codigo)}</span>
+            <span class="subitem-descricao">${escapeHtml(s.descricao)}</span>
+            <span class="subitem-check ${temRealizado ? "ok" : "pendente"}">${temRealizado ? "✓ Realizado" : "Pendente"}</span>
+          </div>
+        `;
+      }).join("");
+
+      return `
+        <div class="eixo-card" style="border-left-color:${ex.cor || "#00AE9D"};">
+          <p class="eixo-card-titulo">${ex.numero}. ${escapeHtml(ex.titulo)}</p>
+          ${linhasSubitens || `<p style="color:var(--ink-soft);font-size:12px;">Nenhum subitem cadastrado ainda.</p>`}
+          <div class="novo-subitem-row">
+            <input type="text" class="codigo-input" placeholder="${ex.numero}.${subitens.length + 1}" data-novo-subitem-codigo="${ex.id}">
+            <input type="text" class="descricao-input" placeholder="Descrição do subitem" data-novo-subitem-descricao="${ex.id}">
+            <button type="button" data-adicionar-subitem="${ex.id}">+ Subitem</button>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    document.querySelectorAll("[data-adicionar-subitem]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const exId = btn.getAttribute("data-adicionar-subitem");
+        const inputCodigo = document.querySelector(`[data-novo-subitem-codigo="${exId}"]`);
+        const inputDescricao = document.querySelector(`[data-novo-subitem-descricao="${exId}"]`);
+        const codigo = inputCodigo.value.trim();
+        const descricao = inputDescricao.value.trim();
+        if (!codigo || !descricao){
+          alert("Preencha o código e a descrição do subitem.");
+          return;
+        }
+        eixosAtuacaoRef.doc(exId).update({
+          subitens: firebase.firestore.FieldValue.arrayUnion({ codigo, descricao })
+        }).catch(err => {
+          console.error("Erro ao adicionar subitem:", err);
+          alert("Não foi possível adicionar o subitem.");
+        });
+      });
+    });
+  }
+
+  // ====== ABA 3: INDICADORES (gráfico + tabelas) ======
+  let graficoStatusMesInstancia = null;
+
+  document.getElementById("filtroEixoGrafico").addEventListener("change", atualizarIndicadores);
+
+  function atualizarIndicadores(){
+    atualizarGraficoStatusMes();
+    atualizarTabelaParticipantes();
+    atualizarTabelaEixosAtuacao();
+  }
+
+  function atualizarGraficoStatusMes(){
+    const canvas = document.getElementById("graficoStatusMes");
+    if (!canvas || typeof Chart === "undefined") return;
+
+    const filtroEixo = document.getElementById("filtroEixoGrafico").value;
+    const eventosFiltrados = eventos.filter(ev => filtroEixo === "todos" || ev.eixo === filtroEixo);
+
+    const contagem = {
+      "Pendente": Array(12).fill(0),
+      "Em andamento": Array(12).fill(0),
+      "Realizado": Array(12).fill(0)
+    };
+
+    eventosFiltrados.forEach(ev => {
+      const mesIndex = Number(ev.mesNum) - 1;
+      if (mesIndex >= 0 && mesIndex < 12 && contagem[ev.status]){
+        contagem[ev.status][mesIndex]++;
+      }
+    });
+
+    const labelsMeses = ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+
+    if (graficoStatusMesInstancia){
+      graficoStatusMesInstancia.data.datasets[0].data = contagem["Pendente"];
+      graficoStatusMesInstancia.data.datasets[1].data = contagem["Em andamento"];
+      graficoStatusMesInstancia.data.datasets[2].data = contagem["Realizado"];
+      graficoStatusMesInstancia.update();
+      return;
+    }
+
+    graficoStatusMesInstancia = new Chart(canvas.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: labelsMeses,
+        datasets: [
+          { label: "Pendente", data: contagem["Pendente"], backgroundColor: "#B23B4E" },
+          { label: "Em andamento", data: contagem["Em andamento"], backgroundColor: "#C98A1B" },
+          { label: "Realizado", data: contagem["Realizado"], backgroundColor: "#1E8E6B" }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { stacked: false },
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        },
+        plugins: {
+          legend: { position: "bottom" }
+        }
+      }
+    });
+  }
+
+  function atualizarTabelaParticipantes(){
+    const container = document.getElementById("tabelaParticipantes");
+    if (!container) return;
+
+    const contagemPorPessoa = {};
+    todosParticipantes().forEach(p => {
+      contagemPorPessoa[p.nome] = { "Pendente": 0, "Em andamento": 0, "Realizado": 0 };
+    });
+
+    eventos.forEach(ev => {
+      (ev.participantes || []).forEach(nome => {
+        if (!contagemPorPessoa[nome]) contagemPorPessoa[nome] = { "Pendente": 0, "Em andamento": 0, "Realizado": 0 };
+        if (contagemPorPessoa[nome][ev.status] !== undefined){
+          contagemPorPessoa[nome][ev.status]++;
+        }
+      });
+    });
+
+    const linhas = Object.entries(contagemPorPessoa).map(([nome, c]) => `
+      <tr>
+        <td>${escapeHtml(nome)}</td>
+        <td>${c["Pendente"]}</td>
+        <td>${c["Em andamento"]}</td>
+        <td>${c["Realizado"]}</td>
+      </tr>
+    `).join("");
+
+    container.innerHTML = `
+      <table class="indicador-table">
+        <thead>
+          <tr><th>Participante</th><th>Pendente</th><th>Em andamento</th><th>Realizado</th></tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    `;
+  }
+
+  function atualizarTabelaEixosAtuacao(){
+    const container = document.getElementById("tabelaEixosAtuacao");
+    if (!container) return;
+
+    if (eixosAtuacao.length === 0){
+      container.innerHTML = `<p style="color:var(--ink-soft);font-size:12.5px;">Cadastre eixos de atuação na aba anterior para ver esta tabela.</p>`;
+      return;
+    }
+
+    const linhas = eixosAtuacao.map(ex => {
+      const ligados = eventos.filter(ev => ev.eixoAtuacaoId === ex.id);
+      const pendente = ligados.filter(ev => ev.status === "Pendente").length;
+      const andamento = ligados.filter(ev => ev.status === "Em andamento").length;
+      const realizado = ligados.filter(ev => ev.status === "Realizado").length;
+      return `
+        <tr>
+          <td>${ex.numero}. ${escapeHtml(ex.titulo)}</td>
+          <td>${pendente}</td>
+          <td>${andamento}</td>
+          <td>${realizado}</td>
+        </tr>
+      `;
+    }).join("");
+
+    container.innerHTML = `
+      <table class="indicador-table">
+        <thead>
+          <tr><th>Eixo de atuação</th><th>Pendente</th><th>Em andamento</th><th>Realizado</th></tr>
+        </thead>
+        <tbody>${linhas}</tbody>
+      </table>
+    `;
+  }
 
   // ====== TELA DE ACESSO COM CHAVE ======
   // A senha em si NUNCA fica no código-fonte. O que acontece:
@@ -1346,9 +2050,15 @@
       cancelarEscutaFirestore(); // para de escutar o Firestore
       cancelarEscutaFirestore = null;
     }
+    if (cancelarEscutaEixos){
+      cancelarEscutaEixos();
+      cancelarEscutaEixos = null;
+    }
     firestoreIniciado = false;
     entregasRef = null;
+    eixosAtuacaoRef = null;
     eventos = [];
+    eixosAtuacao = [];
 
     localStorage.removeItem(CHAVE_STORAGE_KEY);
 
@@ -1368,6 +2078,7 @@
     const tentativaRef = db.collection("acesso").doc(hash).collection("entregas");
     await tentativaRef.limit(1).get(); // se a regra rejeitar, isso lança um erro (permission-denied)
     entregasRef = tentativaRef;
+    eixosAtuacaoRef = db.collection("acesso").doc(hash).collection("eixosAtuacao");
     localStorage.setItem(CHAVE_STORAGE_KEY, hash);
     liberarAcesso();
   }
