@@ -1045,7 +1045,6 @@
     <div class="filter-bar" id="filterBar">
       <button class="filter-btn active" data-eixo="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</button>
       <button class="filter-btn active" data-eixo="Gestão do Crédito">Gestão do Crédito</button>
-      <button class="filter-btn active" data-eixo="Ambos">Ambos</button>
     </div>
     <span style="font-size:11.5px;color:var(--ink-soft);">Dê 2 cliques em um evento para editar</span>
   </div>
@@ -1106,7 +1105,6 @@
           <option value="todos">Todos os eixos</option>
           <option value="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</option>
           <option value="Gestão do Crédito">Gestão do Crédito</option>
-          <option value="Ambos">Ambos</option>
         </select>
       </div>
       <canvas id="graficoStatusMes" height="90"></canvas>
@@ -1137,12 +1135,20 @@
     <h2 id="modalTitle">Nova ação</h2>
     <form id="eventForm">
       <div class="field">
-        <label for="eixo">Eixo</label>
-        <select id="eixo" required>
-          <option value="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</option>
-          <option value="Gestão do Crédito">Gestão do Crédito</option>
-          <option value="Ambos">Ambos</option>
-        </select>
+        <label>Eixo</label>
+        <div class="ms-wrap">
+          <button type="button" class="ms-trigger" id="eixoTrigger">Selecionar eixo</button>
+          <div class="ms-panel" id="eixoPanel">
+            <label class="ms-item">
+              <input type="checkbox" value="Apoio aos Produtos de Crédito">
+              <span>Apoio aos Produtos de Crédito</span>
+            </label>
+            <label class="ms-item">
+              <input type="checkbox" value="Gestão do Crédito">
+              <span>Gestão do Crédito</span>
+            </label>
+          </div>
+        </div>
       </div>
       <div class="field">
         <label for="entrega">Nome da entrega</label>
@@ -1280,7 +1286,7 @@
   }
 
   // Filtro: todas as categorias ativas por padrão
-  let filtroAtivo = new Set(["Apoio aos Produtos de Crédito", "Gestão do Crédito", "Ambos"]);
+  let filtroAtivo = new Set(["Apoio aos Produtos de Crédito", "Gestão do Crédito"]);
 
   // Filtro por participante (foto): vazio = sem filtro, mostra todos os eventos
   let participantesFiltroAtivo = new Set();
@@ -1607,6 +1613,36 @@
     }
   });
 
+  // ====== Multiselect de Eixo (permite marcar um ou os dois) ======
+  let eixoSelecionado = new Set();
+
+  function atualizarTriggerEixo(){
+    const trigger = document.getElementById("eixoTrigger");
+    trigger.textContent = eixoSelecionado.size === 0
+      ? "Selecionar eixo"
+      : Array.from(eixoSelecionado).join(" + ");
+  }
+
+  document.querySelectorAll("#eixoPanel input[type='checkbox']").forEach(chk => {
+    chk.addEventListener("change", () => {
+      if (chk.checked) eixoSelecionado.add(chk.value);
+      else eixoSelecionado.delete(chk.value);
+      atualizarTriggerEixo();
+    });
+  });
+
+  document.getElementById("eixoTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("eixoPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("eixoPanel");
+    const trigger = document.getElementById("eixoTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
+  });
+
   const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
   // Escapa qualquer texto antes de inserir no HTML, prevenindo XSS
@@ -1635,7 +1671,10 @@
     calendar.innerHTML = "";
 
     const eventosFiltrados = eventos
-      .filter(ev => filtroAtivo.has(ev.eixo))
+      .filter(ev => {
+        const eixosDoItem = Array.isArray(ev.eixo) ? ev.eixo : (ev.eixo ? [ev.eixo] : []);
+        return eixosDoItem.some(e => filtroAtivo.has(e));
+      })
       .filter(ev => participantesFiltroAtivo.size === 0 || (ev.participantes || []).some(p => participantesFiltroAtivo.has(p)))
       .filter(ev => !filtroEixoAtuacaoAtivo || ev.eixoAtuacaoId === filtroEixoAtuacaoAtivo)
       .filter(ev => !filtroSubitemAtivo || ev.subitemCodigo === filtroSubitemAtivo)
@@ -1716,7 +1755,7 @@
 
           ev.innerHTML = `
             <button class="del-btn" data-id="${escapeHtml(item.id)}" title="Excluir evento">×</button>
-            <span class="eixo-tag">${escapeHtml(item.eixo)}</span>
+            <span class="eixo-tag">${escapeHtml((Array.isArray(item.eixo) ? item.eixo : (item.eixo ? [item.eixo] : [])).join(" + "))}</span>
             <span class="titulo">${escapeHtml(item.entrega)}</span>
             ${eixoAtuacaoHtml}
             ${cooperativasTextoHtml}
@@ -1940,6 +1979,10 @@
     deleteFromModalBtn.style.display = "none";
     document.getElementById("eventForm").reset();
 
+    eixoSelecionado = new Set();
+    document.querySelectorAll("#eixoPanel input[type='checkbox']").forEach(chk => chk.checked = false);
+    atualizarTriggerEixo();
+
     participantesSelecionados = new Set();
     document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => chk.checked = false);
     atualizarTriggerParticipantes();
@@ -1962,7 +2005,13 @@
     submitBtn.textContent = "Salvar alterações";
     deleteFromModalBtn.style.display = "inline-block";
 
-    document.getElementById("eixo").value = item.eixo;
+    const eixosDoItem = Array.isArray(item.eixo) ? item.eixo : (item.eixo ? [item.eixo] : []);
+    eixoSelecionado = new Set(eixosDoItem);
+    document.querySelectorAll("#eixoPanel input[type='checkbox']").forEach(chk => {
+      chk.checked = eixoSelecionado.has(chk.value);
+    });
+    atualizarTriggerEixo();
+
     document.getElementById("entrega").value = item.entrega;
     document.getElementById("status").value = item.status;
     document.getElementById("mes").value = item.mesNum;
@@ -2005,8 +2054,13 @@
   document.getElementById("eventForm").addEventListener("submit", (e) => {
     e.preventDefault();
 
+    if (eixoSelecionado.size === 0){
+      alert("Selecione ao menos um Eixo.");
+      return;
+    }
+
     const dadosForm = {
-      eixo: document.getElementById("eixo").value,
+      eixo: Array.from(eixoSelecionado),
       entrega: document.getElementById("entrega").value.trim(),
       status: document.getElementById("status").value,
       eixoAtuacaoId: document.getElementById("eixoAtuacao").value || null,
@@ -2249,7 +2303,11 @@
     if (!canvas || typeof Chart === "undefined") return;
 
     const filtroEixo = document.getElementById("filtroEixoGrafico").value;
-    const eventosFiltrados = eventos.filter(ev => filtroEixo === "todos" || ev.eixo === filtroEixo);
+    const eventosFiltrados = eventos.filter(ev => {
+      if (filtroEixo === "todos") return true;
+      const eixosDoItem = Array.isArray(ev.eixo) ? ev.eixo : (ev.eixo ? [ev.eixo] : []);
+      return eixosDoItem.includes(filtroEixo);
+    });
 
     const contagem = {
       "Pendente": Array(12).fill(0),
