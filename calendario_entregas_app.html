@@ -303,6 +303,8 @@
     max-width: 420px;
     padding: 24px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+    max-height: 90vh;
+    overflow-y: auto;
   }
 
   .modal h2{
@@ -457,6 +459,12 @@
   .ms-item:hover{ background: #EFF6F5; }
   .ms-item input{ margin:0; flex-shrink:0; }
   .ms-item span{ flex:1; }
+  .ms-select-all-item{
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 4px;
+    padding-bottom: 8px;
+    color: var(--teal-deep);
+  }
 
   /* Avatares e comentários dentro do card de evento */
   .comment-section{
@@ -931,6 +939,11 @@
     font-size: 10.5px;
     letter-spacing: 0.04em;
   }
+  .linha-total-eixo td{
+    background: #EFF6F5;
+    color: var(--teal-deep);
+    border-top: 1px solid var(--line);
+  }
 
   /* Tela de acesso com chave */
   .access-gate{
@@ -1332,7 +1345,11 @@
 
   function popularParticipantesPanel(){
     const panel = document.getElementById("participantesPanel");
-    let html = `<div class="ms-group-label">${estrutura.consultoria.titulo}</div>`;
+    let html = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>`;
+    html += `<div class="ms-group-label">${estrutura.consultoria.titulo}</div>`;
     estrutura.consultoria.membros.forEach(m => { html += itemCheckboxHtml(m); });
     Object.values(estrutura.suporteComercial.subAreas).forEach(sub => {
       html += `<div class="ms-group-label">${sub.label}</div>`;
@@ -1340,12 +1357,25 @@
     });
     panel.innerHTML = html;
 
-    panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+
+    itensIndividuais().forEach(chk => {
       chk.addEventListener("change", () => {
         if (chk.checked) participantesSelecionados.add(chk.value);
         else participantesSelecionados.delete(chk.value);
         atualizarTriggerParticipantes();
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
       });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) participantesSelecionados.add(chk.value);
+        else participantesSelecionados.delete(chk.value);
+      });
+      atualizarTriggerParticipantes();
     });
   }
 
@@ -1393,19 +1423,35 @@
 
   function popularCooperativasPanel(){
     const panel = document.getElementById("cooperativasPanel");
-    panel.innerHTML = COOPERATIVAS.map(cod => `
+    panel.innerHTML = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>` + COOPERATIVAS.map(cod => `
       <label class="ms-item">
         <input type="checkbox" value="${cod}">
         <span>${cod}</span>
       </label>
     `).join("");
 
-    panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+
+    itensIndividuais().forEach(chk => {
       chk.addEventListener("change", () => {
         if (chk.checked) cooperativasSelecionadas.add(chk.value);
         else cooperativasSelecionadas.delete(chk.value);
         atualizarTriggerCooperativas();
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
       });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) cooperativasSelecionadas.add(chk.value);
+        else cooperativasSelecionadas.delete(chk.value);
+      });
+      atualizarTriggerCooperativas();
     });
   }
 
@@ -1489,20 +1535,37 @@
 
   function popularFiltroCooperativasPanel(){
     const panel = document.getElementById("filtroCooperativasPanel");
-    panel.innerHTML = COOPERATIVAS.map(cod => `
+    panel.innerHTML = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>` + COOPERATIVAS.map(cod => `
       <label class="ms-item">
         <input type="checkbox" value="${cod}">
         <span>${cod}</span>
       </label>
     `).join("");
 
-    panel.querySelectorAll('input[type="checkbox"]').forEach(chk => {
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+
+    itensIndividuais().forEach(chk => {
       chk.addEventListener("change", () => {
         if (chk.checked) filtroCooperativasAtivas.add(chk.value);
         else filtroCooperativasAtivas.delete(chk.value);
         atualizarTriggerFiltroCooperativas();
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
         renderCalendar();
       });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) filtroCooperativasAtivas.add(chk.value);
+        else filtroCooperativasAtivas.delete(chk.value);
+      });
+      atualizarTriggerFiltroCooperativas();
+      renderCalendar();
     });
   }
 
@@ -2273,27 +2336,57 @@
       return;
     }
 
-    const linhas = eixosAtuacao.map(ex => {
-      const ligados = eventos.filter(ev => ev.eixoAtuacaoId === ex.id);
-      const pendente = ligados.filter(ev => ev.status === "Pendente").length;
-      const andamento = ligados.filter(ev => ev.status === "Em andamento").length;
-      const realizado = ligados.filter(ev => ev.status === "Realizado").length;
+    const contarStatus = (lista) => ({
+      pendente: lista.filter(ev => ev.status === "Pendente").length,
+      andamento: lista.filter(ev => ev.status === "Em andamento").length,
+      realizado: lista.filter(ev => ev.status === "Realizado").length
+    });
+
+    const blocos = eixosAtuacao.map(ex => {
+      const subitens = ex.subitens || [];
+
+      let totalPendente = 0, totalAndamento = 0, totalRealizado = 0;
+
+      const linhasSubitens = subitens.map(s => {
+        const ligados = eventosLigadosAoSubitem(ex.id, s.codigo);
+        const c = contarStatus(ligados);
+        totalPendente += c.pendente;
+        totalAndamento += c.andamento;
+        totalRealizado += c.realizado;
+        return `
+          <tr>
+            <td style="padding-left:26px;color:var(--ink-soft);">${escapeHtml(s.codigo)} — ${escapeHtml(s.descricao).slice(0, 50)}${s.descricao.length > 50 ? "…" : ""}</td>
+            <td>${c.pendente}</td>
+            <td>${c.andamento}</td>
+            <td>${c.realizado}</td>
+          </tr>
+        `;
+      }).join("");
+
+      // ações vinculadas ao eixo mas sem subitem definido também entram no total do eixo
+      const semSubitem = eventos.filter(ev => ev.eixoAtuacaoId === ex.id && !ev.subitemCodigo);
+      const cSemSubitem = contarStatus(semSubitem);
+      totalPendente += cSemSubitem.pendente;
+      totalAndamento += cSemSubitem.andamento;
+      totalRealizado += cSemSubitem.realizado;
+
       return `
-        <tr>
-          <td>${ex.numero}. ${escapeHtml(ex.titulo)}</td>
-          <td>${pendente}</td>
-          <td>${andamento}</td>
-          <td>${realizado}</td>
+        <tr class="linha-total-eixo">
+          <td><strong>${ex.numero}. ${escapeHtml(ex.titulo)}</strong></td>
+          <td><strong>${totalPendente}</strong></td>
+          <td><strong>${totalAndamento}</strong></td>
+          <td><strong>${totalRealizado}</strong></td>
         </tr>
+        ${linhasSubitens}
       `;
     }).join("");
 
     container.innerHTML = `
       <table class="indicador-table">
         <thead>
-          <tr><th>Eixo de atuação</th><th>Pendente</th><th>Em andamento</th><th>Realizado</th></tr>
+          <tr><th>Eixo de atuação / Subitem</th><th>Pendente</th><th>Em andamento</th><th>Realizado</th></tr>
         </thead>
-        <tbody>${linhas}</tbody>
+        <tbody>${blocos}</tbody>
       </table>
     `;
   }
