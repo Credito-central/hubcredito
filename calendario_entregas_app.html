@@ -1121,6 +1121,11 @@
       <h2>Ações por eixo de atuação</h2>
       <div id="tabelaEixosAtuacao"></div>
     </div>
+
+    <div class="indicador-card">
+      <h2>Ações por cooperativa participante</h2>
+      <canvas id="graficoCooperativas" height="90"></canvas>
+    </div>
   </div>
 
   <footer>Elaborado pela área de crédito</footer>
@@ -2228,6 +2233,7 @@
 
   // ====== ABA 3: INDICADORES (gráfico + tabelas) ======
   let graficoStatusMesInstancia = null;
+  let graficoCooperativasInstancia = null;
 
   document.getElementById("filtroEixoGrafico").addEventListener("change", atualizarIndicadores);
 
@@ -2235,6 +2241,7 @@
     atualizarGraficoStatusMes();
     atualizarTabelaParticipantes();
     atualizarTabelaEixosAtuacao();
+    atualizarGraficoCooperativas();
   }
 
   function atualizarGraficoStatusMes(){
@@ -2389,6 +2396,54 @@
         <tbody>${blocos}</tbody>
       </table>
     `;
+  }
+
+  function atualizarGraficoCooperativas(){
+    const canvas = document.getElementById("graficoCooperativas");
+    if (!canvas || typeof Chart === "undefined") return;
+
+    const contagem = {
+      "Pendente": [],
+      "Em andamento": [],
+      "Realizado": []
+    };
+
+    COOPERATIVAS.forEach(cod => {
+      const ligadas = eventos.filter(ev => (ev.cooperativas || []).includes(cod));
+      contagem["Pendente"].push(ligadas.filter(ev => ev.status === "Pendente").length);
+      contagem["Em andamento"].push(ligadas.filter(ev => ev.status === "Em andamento").length);
+      contagem["Realizado"].push(ligadas.filter(ev => ev.status === "Realizado").length);
+    });
+
+    if (graficoCooperativasInstancia){
+      graficoCooperativasInstancia.data.datasets[0].data = contagem["Pendente"];
+      graficoCooperativasInstancia.data.datasets[1].data = contagem["Em andamento"];
+      graficoCooperativasInstancia.data.datasets[2].data = contagem["Realizado"];
+      graficoCooperativasInstancia.update();
+      return;
+    }
+
+    graficoCooperativasInstancia = new Chart(canvas.getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: COOPERATIVAS,
+        datasets: [
+          { label: "Pendente", data: contagem["Pendente"], backgroundColor: "#B23B4E" },
+          { label: "Em andamento", data: contagem["Em andamento"], backgroundColor: "#C98A1B" },
+          { label: "Realizado", data: contagem["Realizado"], backgroundColor: "#1E8E6B" }
+        ]
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: { stacked: false },
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        },
+        plugins: {
+          legend: { position: "bottom" }
+        }
+      }
+    });
   }
 
   // ====== TELA DE ACESSO COM CHAVE ======
