@@ -583,6 +583,12 @@
   }
   .comment-toggle-btn:hover{ background: #EFF6F5; border-color: var(--teal); }
 
+  .acao-toggle-row{
+    display:flex;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .acao-toggle-row .meta-toggle-btn{ margin-bottom: 0; }
   .meta-toggle-btn{
     background: transparent;
     border: 1px dashed #C98A1B;
@@ -1180,6 +1186,10 @@
             <option value="12">Dezembro</option>
           </select>
         </div>
+        <div class="field">
+          <label for="anoAcao">Ano</label>
+          <input type="number" id="anoAcao" step="1" style="width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;font-family:var(--font-body);font-size:13px;color:var(--ink);">
+        </div>
       </div>
       <div class="field">
         <label>Participantes</label>
@@ -1228,6 +1238,15 @@
     <button type="button" class="popup-close" id="fecharMetaPopup" title="Fechar">×</button>
     <h2>Meta</h2>
     <p id="metaPopupTexto"></p>
+  </div>
+</div>
+
+<!-- Popup de Descrição do subitem -->
+<div class="overlay" id="descricaoOverlay">
+  <div class="modal meta-popup">
+    <button type="button" class="popup-close" id="fecharDescricaoPopup" title="Fechar">×</button>
+    <h2>Descrição do subitem</h2>
+    <p id="descricaoPopupTexto"></p>
   </div>
 </div>
 
@@ -1762,7 +1781,10 @@
             ${participantesTextoHtml}
             <div class="comment-section ${secaoAberta}" data-comment-section="${escapeHtml(item.id)}" draggable="false">
               ${avataresHtml}
-              <button type="button" class="meta-toggle-btn" data-ver-meta="${escapeHtml(item.id)}">🏆 Meta</button>
+              <div class="acao-toggle-row">
+                <button type="button" class="meta-toggle-btn" data-ver-descricao="${escapeHtml(item.id)}">📄 Descrição</button>
+                <button type="button" class="meta-toggle-btn" data-ver-meta="${escapeHtml(item.id)}">🏆 Meta</button>
+              </div>
               ${bolhasHtml}
               <button type="button" class="comment-toggle-btn" data-toggle-composer="${escapeHtml(item.id)}">+ Comentário</button>
               <div class="comment-composer ${composerAberto}" data-composer="${escapeHtml(item.id)}">
@@ -1872,6 +1894,18 @@
       });
     });
 
+    document.querySelectorAll("[data-ver-descricao]").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = btn.getAttribute("data-ver-descricao");
+        const evento = eventos.find(ev => ev.id === id);
+        if (!evento){ abrirPopupDescricao(""); return; }
+        const ex = eixosAtuacao.find(ax => ax.id === evento.eixoAtuacaoId);
+        const subitem = ex ? (ex.subitens || []).find(s => s.codigo === evento.subitemCodigo) : null;
+        abrirPopupDescricao(subitem ? `${subitem.codigo} — ${subitem.descricao}` : "");
+      });
+    });
+
     // ====== ARRASTAR E SOLTAR (mover entre meses e reordenar dentro do mês) ======
     document.querySelectorAll(".event").forEach(evEl => {
       evEl.addEventListener("dragstart", () => {
@@ -1972,6 +2006,21 @@
     if (e.target.id === "metaOverlay") document.getElementById("metaOverlay").classList.remove("open");
   });
 
+  // ====== POPUP DE DESCRIÇÃO DO SUBITEM ======
+  function abrirPopupDescricao(texto){
+    document.getElementById("descricaoPopupTexto").textContent = texto && texto.trim()
+      ? texto
+      : "Nenhum subitem vinculado a esta ação.";
+    document.getElementById("descricaoOverlay").classList.add("open");
+  }
+
+  document.getElementById("fecharDescricaoPopup").addEventListener("click", () => {
+    document.getElementById("descricaoOverlay").classList.remove("open");
+  });
+  document.getElementById("descricaoOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "descricaoOverlay") document.getElementById("descricaoOverlay").classList.remove("open");
+  });
+
   function abrirModalNovo(){
     editingId = null;
     modalTitle.textContent = "Nova ação";
@@ -1994,6 +2043,8 @@
     document.getElementById("eixoAtuacao").value = "";
     popularSelectSubitem("");
 
+    document.getElementById("anoAcao").value = new Date().getFullYear();
+
     overlay.classList.add("open");
   }
 
@@ -2015,6 +2066,7 @@
     document.getElementById("entrega").value = item.entrega;
     document.getElementById("status").value = item.status;
     document.getElementById("mes").value = item.mesNum;
+    document.getElementById("anoAcao").value = item.ano || new Date().getFullYear();
     document.getElementById("metaAcao").value = item.meta || "";
 
     participantesSelecionados = new Set(item.participantes || []);
@@ -2059,6 +2111,8 @@
       return;
     }
 
+    const anoEscolhido = Number(document.getElementById("anoAcao").value) || anoAtual;
+
     const dadosForm = {
       eixo: Array.from(eixoSelecionado),
       entrega: document.getElementById("entrega").value.trim(),
@@ -2068,7 +2122,7 @@
       meta: document.getElementById("metaAcao").value.trim(),
       participantes: Array.from(participantesSelecionados),
       cooperativas: Array.from(cooperativasSelecionadas),
-      ano: anoAtual,
+      ano: anoEscolhido,
       mesNum: document.getElementById("mes").value
     };
 
@@ -2179,8 +2233,7 @@
           </div>
           ${linhasSubitens || `<p style="color:var(--ink-soft);font-size:12px;">Nenhum subitem cadastrado ainda.</p>`}
           <div class="novo-subitem-row">
-            <input type="text" class="codigo-input" placeholder="${ex.numero}.${subitens.length + 1}" data-novo-subitem-codigo="${ex.id}">
-            <input type="text" class="descricao-input" placeholder="Descrição do subitem" data-novo-subitem-descricao="${ex.id}">
+            <input type="text" class="descricao-input" placeholder="Descrição do subitem (o número ${ex.numero}.${subitens.length + 1} é gerado automaticamente)" data-novo-subitem-descricao="${ex.id}">
             <button type="button" data-adicionar-subitem="${ex.id}">+ Subitem</button>
           </div>
         </div>
@@ -2190,14 +2243,15 @@
     document.querySelectorAll("[data-adicionar-subitem]").forEach(btn => {
       btn.addEventListener("click", () => {
         const exId = btn.getAttribute("data-adicionar-subitem");
-        const inputCodigo = document.querySelector(`[data-novo-subitem-codigo="${exId}"]`);
+        const ex = eixosAtuacao.find(e => e.id === exId);
+        if (!ex) return;
         const inputDescricao = document.querySelector(`[data-novo-subitem-descricao="${exId}"]`);
-        const codigo = inputCodigo.value.trim();
         const descricao = inputDescricao.value.trim();
-        if (!codigo || !descricao){
-          alert("Preencha o código e a descrição do subitem.");
+        if (!descricao){
+          alert("Preencha a descrição do subitem.");
           return;
         }
+        const codigo = `${ex.numero}.${(ex.subitens || []).length + 1}`;
         eixosAtuacaoRef.doc(exId).update({
           subitens: firebase.firestore.FieldValue.arrayUnion({ codigo, descricao })
         }).catch(err => {
@@ -2245,13 +2299,11 @@
         const subitem = (ex.subitens || []).find(s => s.codigo === codigoAtual);
         if (!subitem) return;
 
-        const novoCodigo = prompt("Código do subitem:", subitem.codigo);
-        if (novoCodigo === null || !novoCodigo.trim()) return;
         const novaDescricao = prompt("Descrição do subitem:", subitem.descricao);
         if (novaDescricao === null || !novaDescricao.trim()) return;
 
         const novosSubitens = ex.subitens.map(s =>
-          s.codigo === codigoAtual ? { codigo: novoCodigo.trim(), descricao: novaDescricao.trim() } : s
+          s.codigo === codigoAtual ? { codigo: s.codigo, descricao: novaDescricao.trim() } : s
         );
 
         eixosAtuacaoRef.doc(exId).update({ subitens: novosSubitens }).catch(err => {
@@ -2268,13 +2320,41 @@
         const ex = eixosAtuacao.find(e => e.id === exId);
         if (!ex) return;
 
-        if (confirm(`Excluir o subitem ${codigo}? Ações já vinculadas a ele deixarão de mostrar essa vinculação.`)){
-          const novosSubitens = (ex.subitens || []).filter(s => s.codigo !== codigo);
-          eixosAtuacaoRef.doc(exId).update({ subitens: novosSubitens }).catch(err => {
-            console.error("Erro ao excluir subitem:", err);
+        if (!confirm(`Excluir o subitem ${codigo}? Os subitens seguintes serão renumerados automaticamente (ex: 1.3 vira 1.2), e as ações já vinculadas serão atualizadas para acompanhar a nova numeração.`)){
+          return;
+        }
+
+        const subitensAntigos = ex.subitens || [];
+        const subitensRestantes = subitensAntigos.filter(s => s.codigo !== codigo);
+
+        // Renumera sequencialmente (1.1, 1.2, 1.3...) com base na posição, mantendo a descrição
+        const subitensRenumerados = subitensRestantes.map((s, idx) => ({
+          codigo: `${ex.numero}.${idx + 1}`,
+          descricao: s.descricao
+        }));
+
+        // Mapeia código antigo -> novo código (só os que realmente mudaram)
+        const mapaCodigos = subitensRestantes
+          .map((s, idx) => ({ antigo: s.codigo, novo: subitensRenumerados[idx].codigo }))
+          .filter(m => m.antigo !== m.novo);
+
+        eixosAtuacaoRef.doc(exId).update({ subitens: subitensRenumerados })
+          .then(() => {
+            // Atualiza em cascata as ações que apontavam para os códigos antigos
+            const atualizacoes = [];
+            mapaCodigos.forEach(({ antigo, novo }) => {
+              eventos
+                .filter(ev => ev.eixoAtuacaoId === exId && ev.subitemCodigo === antigo)
+                .forEach(ev => {
+                  atualizacoes.push(entregasRef.doc(ev.id).update({ subitemCodigo: novo }));
+                });
+            });
+            return Promise.all(atualizacoes);
+          })
+          .catch(err => {
+            console.error("Erro ao excluir/renumerar subitem:", err);
             alert("Não foi possível excluir o subitem.");
           });
-        }
       });
     });
 
