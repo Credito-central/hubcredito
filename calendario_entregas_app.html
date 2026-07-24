@@ -7,6 +7,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <style>
   :root{
     --bg: #F4F7F7;
@@ -2429,9 +2430,17 @@
           y: { beginAtZero: true, ticks: { stepSize: 1 } }
         },
         plugins: {
-          legend: { position: "bottom" }
+          legend: { position: "bottom" },
+          datalabels: {
+            anchor: "end",
+            align: "top",
+            color: "#0B2E2C",
+            font: { size: 10, weight: "600" },
+            formatter: (valor) => valor > 0 ? valor : ""
+          }
         }
-      }
+      },
+      plugins: typeof ChartDataLabels !== "undefined" ? [ChartDataLabels] : []
     });
   }
 
@@ -2578,9 +2587,17 @@
           y: { beginAtZero: true, ticks: { stepSize: 1 } }
         },
         plugins: {
-          legend: { position: "bottom" }
+          legend: { position: "bottom" },
+          datalabels: {
+            anchor: "end",
+            align: "top",
+            color: "#0B2E2C",
+            font: { size: 10, weight: "600" },
+            formatter: (valor) => valor > 0 ? valor : ""
+          }
         }
-      }
+      },
+      plugins: typeof ChartDataLabels !== "undefined" ? [ChartDataLabels] : []
     });
   }
 
