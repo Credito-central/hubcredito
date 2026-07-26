@@ -98,6 +98,8 @@
 
         /* PAINEL MACROECONÔMICO (BANCO CENTRAL) */
         .macro-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.2rem; }
+        .grid-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .grid-4col { grid-template-columns: repeat(4, 1fr); }
         .macro-card { background: #fafafa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.9rem; text-align: center; }
         .macro-card .macro-label { font-size: 0.75rem; color: #666; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 0.3rem; }
         .macro-card .macro-value { font-size: 1.3rem; font-weight: 700; color: var(--sicoob-verde-escuro); }
@@ -114,6 +116,49 @@
         #print-area { display: none; }
 
         /* REGRAS DE IMPRESSÃO GERAIS E DINÂMICAS */
+        /* =====================================================================
+           RESPONSIVIDADE MOBILE
+           Abaixo de 900px: empilha formulário e resultado (em vez de lado a
+           lado), reduz paddings/fontes, deixa botões e grids de 1 coluna só,
+           e transforma o resultado de "flutuante" (sticky) em uma seção normal
+           que aparece logo depois do formulário.
+           ===================================================================== */
+        @media (max-width: 900px) {
+            .portal-header { padding: 1rem 1.2rem; gap: 1rem; }
+            .portal-header img.logo { height: 34px; }
+            .portal-header h1 { font-size: 1.15rem; }
+
+            .main-container { flex-direction: column; gap: 1.2rem; margin: 1rem auto; padding: 0 0.8rem; }
+            .form-section, .result-section { width: 100%; box-sizing: border-box; }
+            .form-section { padding: 1.2rem; }
+            .result-section {
+                position: static;
+                height: auto;
+                min-height: 320px;
+                padding: 1.2rem;
+            }
+            .result-section textarea { min-height: 260px; }
+
+            .form-group { padding: 1rem; }
+            .group-title { flex-wrap: wrap; gap: 8px; font-size: 0.95rem; }
+
+            .grid-2col, .grid-4col { grid-template-columns: 1fr !important; }
+            .checkbox-group { grid-template-columns: 1fr; }
+            .macro-grid { grid-template-columns: repeat(2, 1fr); }
+
+            .action-buttons { flex-direction: column; }
+            .btn-acao { width: 100%; min-width: 0; }
+
+            input[type="text"], input[type="number"], select, .empresa-input { font-size: 16px; } /* evita zoom automático do iOS ao focar campo */
+
+            .modal-content, .popup-content { width: 92%; padding: 1.5rem; }
+        }
+
+        @media (max-width: 480px) {
+            .macro-grid { grid-template-columns: 1fr 1fr; }
+            .friendly-tip { font-size: 0.8rem; }
+        }
+
         @media print {
             @page { margin: 1.5cm; }
             
@@ -195,6 +240,20 @@
         <div class="question-block" style="border-bottom: none; margin-bottom: 2rem;">
             <label class="main-label" style="font-size: 1.1rem; color: var(--sicoob-verde-escuro);">Nome da Empresa:</label>
             <input type="text" id="q_nome_empresa" class="empresa-input" placeholder="Razão Social ou Nome Fantasia" oninput="gerarParecer()">
+
+            <div style="display:flex; gap:1rem; margin-top: 0.8rem; flex-wrap: wrap;">
+                <div style="flex:1; min-width: 200px;">
+                    <label class="main-label">Preenchido por:</label>
+                    <input type="text" id="q_analista" placeholder="Nome do gerente/analista responsável" oninput="gerarParecer()">
+                </div>
+                <div style="flex:1; min-width: 160px;">
+                    <label class="main-label">PA / Agência:</label>
+                    <input type="text" id="q_pa" placeholder="Ex: PA 2016" oninput="gerarParecer()">
+                </div>
+            </div>
+            <p class="friendly-tip" style="margin-top: 0.6rem; margin-bottom: 0;">
+                <i class="fa-solid fa-clock"></i> Data e hora de preenchimento são registradas automaticamente no relatório gerado, junto com o nome informado acima - garantindo rastreabilidade de quem elaborou a análise.
+            </p>
         </div>
 
         <div class="form-group macro-panel" style="border-left-color: var(--sicoob-roxo);">
@@ -264,8 +323,13 @@
             </div>
             <div class="question-block">
                 <label class="main-label">3.1. Qual o posicionamento da empresa frente à concorrência e dependência de clientes?</label>
-                <input type="text" id="q_mercado" oninput="gerarParecer()">
-                <label class="checkbox-wrapper"><input type="checkbox" id="chk_mercado" onchange="toggleInput('q_mercado', this.checked)"> Não possuo essa informação</label>
+                <select id="q_mercado" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="Ocupa posição de liderança no mercado em que atua, com baixa dependência de clientes específicos">Liderança de mercado, baixa dependência de clientes</option>
+                    <option value="Ocupa posição intermediária frente à concorrência, com dependência moderada de um grupo restrito de clientes">Posição intermediária, dependência moderada de poucos clientes</option>
+                    <option value="Apresenta posição frágil frente à concorrência, com alta dependência de poucos clientes e/ou fornecedores">Posição frágil, alta dependência de poucos clientes/fornecedores</option>
+                    <option value="Atua em mercado pulverizado, sem dependência concentrada em clientes ou fornecedores específicos">Mercado pulverizado, sem dependência concentrada</option>
+                </select>
             </div>
             <div class="question-block">
                 <label class="main-label">3.2. Como o ciclo operacional afeta o caixa (prazos de compra, venda e estoque)?</label>
@@ -288,21 +352,204 @@
             </div>
             <div class="question-block">
                 <label class="main-label">4.2. Qual o grau de fidelidade e potencial de novos negócios (Portfólio)?</label>
-                <input type="text" id="q_portfolio" oninput="gerarParecer()">
-                <label class="checkbox-wrapper"><input type="checkbox" id="chk_portfolio" onchange="toggleInput('q_portfolio', this.checked)"> Não possuo essa informação</label>
+                <select id="q_portfolio" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="alta fidelidade institucional, com portfólio de produtos completo">Alta fidelidade, portfólio completo</option>
+                    <option value="fidelidade moderada, com espaço relevante para ampliação da reciprocidade">Fidelidade moderada, espaço para reciprocidade</option>
+                    <option value="baixa fidelidade institucional, com relacionamento pontual">Baixa fidelidade, relacionamento pontual</option>
+                    <option value="relacionamento recente, ainda sem histórico consolidado de reciprocidade">Cliente novo, sem histórico de reciprocidade</option>
+                </select>
             </div>
             <div class="question-block">
                 <label class="main-label">4.3. Como é a movimentação atual na conta corrente e qual a expectativa de incremento com esta operação?</label>
-                <input type="text" id="q_movimentacao" oninput="gerarParecer()">
-                <label class="checkbox-wrapper"><input type="checkbox" id="chk_movimentacao" onchange="toggleInput('q_movimentacao', this.checked)"> Não possuo essa informação</label>
+                <select id="q_movimentacao" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="apresenta movimentação consistente em conta corrente, com expectativa de incremento relevante a partir desta operação">Movimentação consistente, expectativa de aumento relevante</option>
+                    <option value="apresenta movimentação moderada em conta corrente, com leve expectativa de incremento">Movimentação moderada, leve expectativa de incremento</option>
+                    <option value="apresenta movimentação baixa ou irregular em conta corrente, sem expectativa relevante de incremento">Movimentação baixa/irregular, sem expectativa de incremento</option>
+                    <option value="possui conta corrente recém-aberta, sem histórico de movimentação para referência">Conta nova, sem histórico de movimentação</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group" style="border-left-color: var(--sicoob-verde-medio); background: rgba(125,182,28,0.04);">
+            <div class="group-title">
+                5. Balanço Perguntado (Indicadores Quantitativos)
+                <button class="btn-dicionario" onclick="abrirModal()"><i class="fa-solid fa-book"></i> Ver Indicadores</button>
+            </div>
+            <p class="friendly-tip">
+                <i class="fa-solid fa-circle-info"></i> Colete estes números diretamente com o cooperado durante a visita. Eles alimentam um cálculo automático de ciclo operacional/financeiro e uma estimativa de Necessidade de Capital de Giro (NCG) — uma leitura quantitativa que complementa a análise qualitativa. É uma estimativa de apoio; não substitui o cálculo oficial feito com os dados objetivos do sistema.
+            </p>
+
+            <div class="grid-2col" style="margin-bottom: 1rem;">
+                <div>
+                    <label class="main-label">5.1. Faturamento médio mensal (R$)</label>
+                    <input type="number" id="bp_faturamento" min="0" step="0.01" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.2. Valor médio de compras mensais (R$)</label>
+                    <input type="number" id="bp_compras" min="0" step="0.01" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.3. Valor médio de estoque (R$)</label>
+                    <input type="number" id="bp_estoque_valor" min="0" step="0.01" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.4. Margem média sobre vendas (%)</label>
+                    <input type="number" id="bp_margem" min="0" max="100" step="0.1" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.5. PMRE — Prazo médio de renovação de estoques (dias)</label>
+                    <input type="number" id="bp_pmre" min="0" step="1" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.6. PMRV — Prazo médio de recebimento de vendas (dias)</label>
+                    <input type="number" id="bp_pmrv" min="0" step="1" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.7. PMPC — Prazo médio de pagamento de compras (dias)</label>
+                    <input type="number" id="bp_pmpc" min="0" step="1" oninput="calcularBalancoPerguntado()">
+                </div>
+                <div>
+                    <label class="main-label">5.8. Endividamento total estimado (R$)</label>
+                    <input type="number" id="bp_endividamento_valor" min="0" step="0.01" oninput="calcularBalancoPerguntado()">
+                </div>
+            </div>
+
+            <div class="macro-grid grid-4col" id="bp_resultado_grid">
+                <div class="macro-card">
+                    <div class="macro-label">Ciclo Operacional</div>
+                    <div class="macro-value" id="bp_ciclo_operacional">—</div>
+                </div>
+                <div class="macro-card">
+                    <div class="macro-label">Ciclo Financeiro</div>
+                    <div class="macro-value" id="bp_ciclo_financeiro">—</div>
+                </div>
+                <div class="macro-card">
+                    <div class="macro-label">NCG Estimada</div>
+                    <div class="macro-value" id="bp_ncg">—</div>
+                </div>
+                <div class="macro-card">
+                    <div class="macro-label">Efeito Tesoura</div>
+                    <div class="macro-value" id="bp_tesoura" style="font-size: 0.95rem;">—</div>
+                </div>
+            </div>
+            <label class="checkbox-wrapper"><input type="checkbox" id="chk_balanco_perguntado" onchange="calcularBalancoPerguntado()"> Não foi possível coletar esses números nesta visita</label>
+        </div>
+
+        <div class="form-group" style="border-left-color: var(--sicoob-turquesa);">
+            <div class="group-title">6. Percepção da Visita In Loco</div>
+            <p class="friendly-tip">
+                <i class="fa-solid fa-eye"></i> O que só o olhar presencial revela. Se algo destoar do que foi declarado, registre no campo de divergência — esse cruzamento agrega muito valor ao parecer.
+            </p>
+            <div class="grid-2col">
+                <div class="question-block">
+                    <label class="main-label">6.1. Movimento observado no ponto de venda</label>
+                    <select id="q_movimento_pdv" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="alto">Alto - fluxo constante de clientes durante a visita</option>
+                        <option value="moderado">Moderado - fluxo intermitente</option>
+                        <option value="baixo">Baixo - pouco ou nenhum movimento durante a visita</option>
+                    </select>
+                </div>
+                <div class="question-block">
+                    <label class="main-label">6.2. Estoque físico observado vs. declarado</label>
+                    <select id="q_estoque_divergencia" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="compativel">Compatível com o declarado</option>
+                        <option value="mais">Divergência: estoque físico maior que o declarado</option>
+                        <option value="menos">Divergência: estoque físico menor que o declarado</option>
+                    </select>
+                </div>
+                <div class="question-block">
+                    <label class="main-label">6.3. Número de funcionários observados no local</label>
+                    <input type="number" id="q_num_funcionarios" min="0" step="1" oninput="gerarParecer()">
+                </div>
+                <div class="question-block">
+                    <label class="main-label">6.4. Estado das instalações e equipamentos</label>
+                    <select id="q_estado_instalacoes" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="5">5 - Excelente: instalações novas/muito bem conservadas</option>
+                        <option value="4">4 - Bom estado geral, manutenção em dia</option>
+                        <option value="3">3 - Estado mediano, alguns desgastes visíveis</option>
+                        <option value="2">2 - Conservação abaixo do esperado</option>
+                        <option value="1">1 - Crítico: sinais evidentes de degradação/sucateamento</option>
+                    </select>
+                </div>
+            </div>
+            <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0; background: rgba(178, 51, 51, 0.05); padding: 10px; border-radius: 6px; border-left: 4px solid #b23;">
+                <label class="main-label" style="color: #b23;">6.5. Divergências identificadas entre o declarado e o observado</label>
+                <input type="text" id="q_divergencias" placeholder="Deixe em branco se não houver divergências" oninput="gerarParecer()">
+            </div>
+        </div>
+
+        <div class="form-group" style="border-left-color: var(--sicoob-roxo);">
+            <div class="group-title">7. Governança e Caráter do Cooperado</div>
+            <p class="friendly-tip">
+                <i class="fa-solid fa-user-shield"></i> Fatores tipicamente ausentes do cadastro, mas que costumam ser decisivos na decisão de crédito.
+            </p>
+            <div class="grid-2col">
+                <div class="question-block">
+                    <label class="main-label">7.1. Dependência do sócio-fundador / plano de sucessão</label>
+                    <select id="q_dependencia_socio" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="5">5 - Baixa dependência, sucessão bem definida</option>
+                        <option value="4">4 - Dependência moderada, sucessão em construção</option>
+                        <option value="3">3 - Dependência relevante, sem plano formal</option>
+                        <option value="2">2 - Alta dependência, sem indícios de sucessão</option>
+                        <option value="1">1 - Dependência crítica e integral do fundador</option>
+                    </select>
+                </div>
+                <div class="question-block">
+                    <label class="main-label">7.2. Mistura entre caixa pessoal e caixa da empresa</label>
+                    <select id="q_mistura_caixa" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="nao">Não há indícios de mistura</option>
+                        <option value="indicios">Há indícios de mistura ocasional</option>
+                        <option value="sim">Confirmada mistura relevante entre as contas</option>
+                    </select>
+                </div>
+                <div class="question-block">
+                    <label class="main-label">7.3. Confiabilidade da contabilidade apresentada</label>
+                    <select id="q_confiabilidade_contabil" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="5">5 - Alta - contabilidade organizada e consistente</option>
+                        <option value="4">4 - Boa, com pequenas inconsistências</option>
+                        <option value="3">3 - Mediana, exige validações adicionais</option>
+                        <option value="2">2 - Baixa, inconsistências relevantes</option>
+                        <option value="1">1 - Não confiável</option>
+                    </select>
+                </div>
+                <div class="question-block">
+                    <label class="main-label">7.4. Reputação do cooperado na praça</label>
+                    <select id="q_reputacao_praca" onchange="gerarParecer()">
+                        <option value="">Selecione...</option>
+                        <option value="5">5 - Excelente reputação, referência local</option>
+                        <option value="4">4 - Boa reputação</option>
+                        <option value="3">3 - Reputação neutra/pouco conhecida</option>
+                        <option value="2">2 - Reputação com ressalvas</option>
+                        <option value="1">1 - Reputação negativa/restritiva</option>
+                    </select>
+                </div>
+            </div>
+            <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
+                <label class="main-label">7.5. Transparência do cooperado durante a entrevista</label>
+                <select id="q_transparencia" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="5">5 - Muito transparente, respondeu a tudo com clareza</option>
+                    <option value="4">4 - Transparente, poucas evasivas</option>
+                    <option value="3">3 - Parcialmente transparente</option>
+                    <option value="2">2 - Pouco transparente, várias evasivas</option>
+                    <option value="1">1 - Pouco colaborativo/reticente</option>
+                </select>
             </div>
         </div>
 
         <div class="form-group" style="border-left-color: var(--sicoob-verde-claro);">
-            <div class="group-title">5. Documentação e Garantias Reais</div>
+            <div class="group-title">8. Documentação e Garantias Reais</div>
 
             <div class="question-block" style="background: rgba(125, 182, 28, 0.05); padding: 10px; border-radius: 6px; border-left: 4px solid var(--sicoob-verde-medio);">
-                <label class="main-label">5.1. Você conferiu se as documentações das fases anteriores (Documentação e Garantias) estão corretas e anexadas?</label>
+                <label class="main-label">8.1. Você conferiu se as documentações das fases anteriores (Documentação e Garantias) estão corretas e anexadas?</label>
                 <select id="q_doc_conferencia" onchange="verificarPopUpDoc()">
                     <option value="">Selecione...</option>
                     <option value="Confirmo que as documentações das fases anteriores (Documentação e validação de Garantias) foram devidamente conferidas e encontram-se em plena conformidade no sistema.">Sim, conferi e validei a conformidade.</option>
@@ -311,7 +558,7 @@
             </div>
 
             <div class="question-block">
-                <label class="main-label">5.2. Quais os tipos de garantias irão possuir a operação?</label>
+                <label class="main-label">8.2. Quais os tipos de garantias irão possuir a operação?</label>
                 <div class="checkbox-group">
                     <label style="font-weight: bold;"><input type="checkbox" name="garantia" value="NÃO POSSUI GARANTIA" onchange="avaliarGarantias()"> NÃO POSSUI GARANTIA</label>
                     <label><input type="checkbox" name="garantia" value="CESSÃO DE DIREITOS CRED" onchange="avaliarGarantias()"> CESSÃO DE DIREITOS CRED</label>
@@ -325,30 +572,60 @@
             </div>
             
             <div class="question-block" id="div_garantia_fisica" style="display: none; background: rgba(0, 174, 157, 0.05); padding: 10px; border-radius: 6px;">
-                <label class="main-label" style="color: var(--sicoob-turquesa);">5.3. Qual a sua percepção sobre a conservação e liquidez do bem ofertado?</label>
+                <label class="main-label" style="color: var(--sicoob-turquesa);">8.3. Qual a sua percepção sobre a conservação e liquidez do bem ofertado?</label>
                 <input type="text" id="q_garantia_fisica" oninput="gerarParecer()">
                 <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_fisica" onchange="toggleInput('q_garantia_fisica', this.checked)"> Não possuo essa informação</label>
             </div>
 
             <div class="question-block">
-                <label class="main-label" id="lbl_pessoas">5.3. Existem apontamentos críticos nos participantes da operação? (avalistas, cônjuges, estado civil)?</label>
-                <input type="text" id="q_garantia_pessoas" oninput="gerarParecer()">
-                <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_pessoas" onchange="toggleInput('q_garantia_pessoas', this.checked)"> Não possuo essa informação</label>
+                <label class="main-label" id="lbl_pessoas">8.3. Existem apontamentos críticos nos participantes da operação? (avalistas, cônjuges, estado civil)?</label>
+                <select id="q_garantia_pessoas" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="não foram identificados apontamentos críticos nos participantes da operação">Nenhum apontamento crítico identificado</option>
+                    <option value="foram identificados apontamentos leves/administrativos nos participantes, sem impacto relevante na operação">Apontamentos leves/administrativos, sem impacto relevante</option>
+                    <option value="foram identificados apontamentos críticos nos participantes (negativação, protesto e/ou ação judicial)">Apontamentos críticos (negativação/protesto/ação judicial)</option>
+                    <option value="há divergência de estado civil/composição familiar a regularizar antes da formalização">Divergência de estado civil/composição familiar a regularizar</option>
+                </select>
+            </div>
+
+            <div class="question-block" style="border-bottom: none; margin-bottom: 1.2rem; padding-bottom: 0;">
+                <label class="main-label" id="lbl_legal">8.4. Qual a percepção sobre regularidade documental e risco ambiental?</label>
+                <select id="q_garantia_legal" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="apresenta regularidade documental e ambiental plena">Regularidade documental e ambiental plena</option>
+                    <option value="apresenta pendências documentais/ambientais menores, atualmente em regularização">Pendências documentais/ambientais menores, em regularização</option>
+                    <option value="apresenta pendências relevantes de regularidade documental/ambiental">Pendências relevantes de regularidade documental/ambiental</option>
+                    <option value="apresenta risco ambiental identificado, exigindo parecer técnico específico">Risco ambiental identificado, exige parecer técnico específico</option>
+                </select>
             </div>
 
             <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
-                <label class="main-label" id="lbl_legal">5.4. Qual a percepção sobre regularidade documental e risco ambiental?</label>
-                <input type="text" id="q_garantia_legal" oninput="gerarParecer()">
-                <label class="checkbox-wrapper"><input type="checkbox" id="chk_garantia_legal" onchange="toggleInput('q_garantia_legal', this.checked)"> Não possuo essa informação</label>
+                <label class="main-label">8.5. Anexar evidências fotográficas (empreendimento e/ou bem em garantia)</label>
+                <input type="file" id="q_anexos_fotos" accept="image/*" capture="environment" multiple onchange="listarAnexos()">
+                <div id="lista_anexos" style="font-size: 0.8rem; color: #666; margin-top: 6px;"></div>
+                <p class="friendly-tip" style="margin-top: 8px; margin-bottom: 0;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Nesta versão (100% cliente, hospedada no GitHub Pages) os arquivos ficam apenas listados aqui, sem envio automático — anexe-os manualmente ao dossiê no SharePoint. Dá para automatizar isso mais adiante ligando ao mesmo fluxo de Power Automate usado para o envio do parecer em .docx.
+                </p>
             </div>
         </div>
 
         <div class="form-group" style="border-left-color: var(--sicoob-verde-escuro); margin-bottom: 0;">
-            <div class="group-title">6. Considerações Finais</div>
-            <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0;">
-                <label class="main-label">6.1. Existe algum outro fator (positivo ou negativo) que gostaria de elucidar e que merece destaque?</label>
+            <div class="group-title">9. Encerramento: Posicionamento</div>
+
+            <div class="question-block">
+                <label class="main-label">9.1. Existe algum outro fator (positivo ou negativo) que gostaria de elucidar e que merece destaque?</label>
                 <input type="text" id="q_extra" oninput="gerarParecer()">
                 <label class="checkbox-wrapper"><input type="checkbox" id="chk_extra" onchange="toggleInput('q_extra', this.checked)"> Não possuo essa informação</label>
+            </div>
+
+            <div class="question-block" style="border-bottom: none; margin-bottom: 0; padding-bottom: 0; background: rgba(0,54,65,0.04); padding: 10px; border-radius: 6px; border-left: 4px solid var(--sicoob-verde-escuro);">
+                <label class="main-label">9.2. Posicionamento do gerente/analista</label>
+                <select id="q_posicionamento" onchange="gerarParecer()">
+                    <option value="">Selecione...</option>
+                    <option value="favoravel">Favorável</option>
+                    <option value="favoravel_ressalvas">Favorável, com ressalvas</option>
+                    <option value="desfavoravel">Desfavorável</option>
+                </select>
             </div>
         </div>
 
@@ -368,7 +645,11 @@
             <button class="btn-acao btn-imprimir-form" onclick="imprimirFormulario()">
                 <i class="fa-solid fa-file-lines"></i> Formulário
             </button>
+            <button class="btn-acao" id="btn_enviar_sharepoint" onclick="enviarParaSharePoint()" style="background: var(--sicoob-roxo); color: #fff;">
+                <i class="fa-solid fa-cloud-arrow-up"></i> Enviar p/ SharePoint (.docx)
+            </button>
         </div>
+        <div id="status_envio_sharepoint" style="font-size: 0.8rem; margin-top: 6px; min-height: 1.2em;"></div>
     </section>
 </main>
 
@@ -455,16 +736,16 @@
 
         if (mostrarFisica) {
             divFisica.style.display = 'block';
-            lblPessoas.innerText = "5.4. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?";
-            lblLegal.innerText = "5.5. Qual a percepção sobre regularidade documental e risco ambiental?";
+            lblPessoas.innerText = "8.4. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?";
+            lblLegal.innerText = "8.5. Qual a percepção sobre regularidade documental e risco ambiental?";
         } else {
             divFisica.style.display = 'none';
             document.getElementById('q_garantia_fisica').value = "";
             document.getElementById('chk_garantia_fisica').checked = false;
             document.getElementById('q_garantia_fisica').disabled = false;
             
-            lblPessoas.innerText = "5.3. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?";
-            lblLegal.innerText = "5.4. Qual a percepção sobre regularidade documental e risco ambiental?";
+            lblPessoas.innerText = "8.3. Existem apontamentos críticos nas pessoas (avalistas, cônjuges, estado civil)?";
+            lblLegal.innerText = "8.4. Qual a percepção sobre regularidade documental e risco ambiental?";
         }
         gerarParecer();
     }
@@ -475,13 +756,19 @@
         // DATA DE HOJE
         const hoje = new Date();
         const dataFormatada = hoje.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
-        parecer += "Data do relatório: " + dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1) + "\n\n";
+        parecer += "Data de hoje: " + dataFormatada.charAt(0).toUpperCase() + dataFormatada.slice(1) + "\n\n";
         
-        // EMPRESA
+        // EMPRESA E RASTREABILIDADE
         const nomeEmpresa = document.getElementById('q_nome_empresa').value.trim();
         if (nomeEmpresa) {
-            parecer += "EMPRESA / COOPERADO: " + nomeEmpresa.toUpperCase() + "\n\n";
+            parecer += "EMPRESA / COOPERADO: " + nomeEmpresa.toUpperCase() + "\n";
         }
+        const analista = document.getElementById('q_analista').value.trim();
+        const pa = document.getElementById('q_pa').value.trim();
+        if (analista || pa) {
+            parecer += "Preenchido por: " + (analista || "(não informado)") + (pa ? " | " + pa : "") + "\n";
+        }
+        parecer += "\n";
 
         // BLOCO 1 - CENÁRIO MACROECONÔMICO (dados Bacen)
         if (window.macroTextoParecer) {
@@ -507,9 +794,9 @@
         const mercado = document.getElementById('q_mercado').value.trim();
         const operacao = document.getElementById('q_operacao').value.trim();
         const futuro = document.getElementById('q_futuro').value.trim();
-        if (mercado || operacao || futuro || document.getElementById('chk_mercado').checked || document.getElementById('chk_operacao').checked || document.getElementById('chk_futuro').checked) {
+        if (mercado || operacao || futuro || document.getElementById('chk_operacao').checked || document.getElementById('chk_futuro').checked) {
             parecer += "3. SITUAÇÃO MERCADOLÓGICA E OPERACIONAL\n";
-            parecer += document.getElementById('chk_mercado').checked ? "- [Info Indisponível] Posicionamento frente à concorrência.\n" : (mercado ? `Frente ao mercado, a empresa possui ${mercado}. ` : "");
+            parecer += mercado ? `Frente ao mercado, a empresa ${mercado}. ` : "";
             parecer += document.getElementById('chk_operacao').checked ? "- [Info Indisponível] Ciclo operacional e caixa.\n" : (operacao ? `Operacionalmente, o ciclo atua da seguinte forma: ${operacao}. ` : "");
             parecer += document.getElementById('chk_futuro').checked ? "- [Info Indisponível] Perspectivas de inovação e divisas.\n" : (futuro ? `Quanto a projetos futuros, há potencial de ${futuro}.` : "");
             parecer += "\n\n";
@@ -519,23 +806,69 @@
         const endividamento = document.getElementById('q_endividamento').value.trim();
         const portfolio = document.getElementById('q_portfolio').value.trim();
         const movimentacao = document.getElementById('q_movimentacao').value.trim();
-        if (endividamento || portfolio || movimentacao || document.getElementById('chk_endividamento').checked || document.getElementById('chk_portfolio').checked || document.getElementById('chk_movimentacao').checked) {
+        if (endividamento || portfolio || movimentacao || document.getElementById('chk_endividamento').checked) {
             parecer += "4. SITUAÇÃO FINANCEIRA E RECIPROCIDADE\n";
             parecer += document.getElementById('chk_endividamento').checked ? "- [Info Indisponível] Endividamento e pontualidade.\n" : (endividamento ? `Avaliando o endividamento geral, observa-se que ${endividamento}. ` : "");
-            parecer += document.getElementById('chk_portfolio').checked ? "- [Info Indisponível] Grau de fidelidade e portfólio.\n" : (portfolio ? `No tocante à fidelidade institucional, o cooperado apresenta ${portfolio}. ` : "");
-            parecer += document.getElementById('chk_movimentacao').checked ? "- [Info Indisponível] Movimentação em conta corrente.\n" : (movimentacao ? `Sobre a movimentação na conta corrente, nota-se que ${movimentacao}.` : "");
+            parecer += portfolio ? `No tocante à fidelidade institucional, o cooperado apresenta ${portfolio}. ` : "";
+            parecer += movimentacao ? `Sobre a movimentação na conta corrente, o cooperado ${movimentacao}.` : "";
             parecer += "\n\n";
         }
 
-        // BLOCO 5
+        // BLOCO 5 - BALANÇO PERGUNTADO (indicadores quantitativos)
+        if (window.bpTextoParecer) {
+            parecer += "5. BALANÇO PERGUNTADO (INDICADORES QUANTITATIVOS)\n";
+            parecer += window.bpTextoParecer;
+            parecer += "\n\n";
+        }
+
+        // BLOCO 6 - PERCEPÇÃO DA VISITA IN LOCO
+        const movimentoPdv = document.getElementById('q_movimento_pdv').value;
+        const estoqueDivergencia = document.getElementById('q_estoque_divergencia').value;
+        const numFuncionarios = document.getElementById('q_num_funcionarios').value.trim();
+        const estadoInstalacoes = document.getElementById('q_estado_instalacoes').value;
+        const divergencias = document.getElementById('q_divergencias').value.trim();
+
+        const textoMovimento = { alto: "movimento alto, com fluxo constante de clientes durante a visita", moderado: "movimento moderado, com fluxo intermitente", baixo: "movimento baixo, com pouco fluxo de clientes durante a visita" };
+        const textoEstoque = { compativel: "o estoque físico observado é compatível com o declarado", mais: "o estoque físico observado é MAIOR que o declarado - divergência a esclarecer", menos: "o estoque físico observado é MENOR que o declarado - divergência a esclarecer" };
+
+        if (movimentoPdv || estoqueDivergencia || numFuncionarios || estadoInstalacoes || divergencias) {
+            parecer += "6. PERCEPÇÃO DA VISITA IN LOCO\n";
+            parecer += movimentoPdv ? `Durante a visita, observou-se ${textoMovimento[movimentoPdv]}. ` : "";
+            parecer += estoqueDivergencia ? `Quanto ao estoque, ${textoEstoque[estoqueDivergencia]}. ` : "";
+            parecer += numFuncionarios ? `Foram observados ${numFuncionarios} funcionário(s) no local. ` : "";
+            parecer += estadoInstalacoes ? `O estado das instalações e equipamentos é classificado como ${descreverEscala(estadoInstalacoes)} (${estadoInstalacoes}/5). ` : "";
+            parecer += divergencias ? `\n- [Divergência identificada] ${divergencias}` : "";
+            parecer += "\n\n";
+        }
+
+        // BLOCO 7 - GOVERNANÇA E CARÁTER DO COOPERADO
+        const depSocio = document.getElementById('q_dependencia_socio').value;
+        const misturaCaixa = document.getElementById('q_mistura_caixa').value;
+        const confContabil = document.getElementById('q_confiabilidade_contabil').value;
+        const reputacao = document.getElementById('q_reputacao_praca').value;
+        const transparencia = document.getElementById('q_transparencia').value;
+
+        const textoMistura = { nao: "não há indícios de mistura entre o caixa pessoal e o da empresa", indicios: "há indícios de mistura ocasional entre o caixa pessoal e o da empresa", sim: "foi confirmada mistura relevante entre o caixa pessoal e o da empresa - ponto de atenção" };
+
+        if (depSocio || misturaCaixa || confContabil || reputacao || transparencia) {
+            parecer += "7. GOVERNANÇA E CARÁTER DO COOPERADO\n";
+            parecer += depSocio ? `A dependência do sócio-fundador e o plano de sucessão foram avaliados como ${descreverEscala(depSocio)} (${depSocio}/5). ` : "";
+            parecer += misturaCaixa ? `Quanto à separação patrimonial, ${textoMistura[misturaCaixa]}. ` : "";
+            parecer += confContabil ? `A confiabilidade da contabilidade apresentada é ${descreverEscala(confContabil)} (${confContabil}/5). ` : "";
+            parecer += reputacao ? `A reputação do cooperado na praça é ${descreverEscala(reputacao)} (${reputacao}/5). ` : "";
+            parecer += transparencia ? `A transparência demonstrada durante a entrevista é ${descreverEscala(transparencia)} (${transparencia}/5).` : "";
+            parecer += "\n\n";
+        }
+
+        // BLOCO 8 - DOCUMENTAÇÃO E GARANTIAS
         const docConf = document.getElementById('q_doc_conferencia').value;
         const boxesGarantia = Array.from(document.querySelectorAll('input[name="garantia"]:checked')).map(cb => cb.value);
         const garFisica = document.getElementById('q_garantia_fisica').value.trim();
-        const garPessoas = document.getElementById('q_garantia_pessoas').value.trim();
-        const garLegal = document.getElementById('q_garantia_legal').value.trim();
+        const garPessoas = document.getElementById('q_garantia_pessoas').value;
+        const garLegal = document.getElementById('q_garantia_legal').value;
         
-        if (docConf || boxesGarantia.length > 0 || garFisica || garPessoas || garLegal || document.getElementById('chk_garantia_fisica').checked || document.getElementById('chk_garantia_pessoas').checked || document.getElementById('chk_garantia_legal').checked) {
-            parecer += "5. DOCUMENTAÇÃO E GARANTIAS REAIS\n";
+        if (docConf || boxesGarantia.length > 0 || garFisica || garPessoas || garLegal || document.getElementById('chk_garantia_fisica').checked) {
+            parecer += "8. DOCUMENTAÇÃO E GARANTIAS REAIS\n";
             
             if (docConf) {
                 parecer += docConf + "\n";
@@ -551,19 +884,109 @@
                 parecer += document.getElementById('chk_garantia_fisica').checked ? "\n- [Info Indisponível] Percepção física e liquidez do bem." : (garFisica ? `Em relação ao bem ofertado, atesta-se que ${garFisica}. ` : "");
             }
 
-            parecer += document.getElementById('chk_garantia_pessoas').checked ? "\n- [Não foi possível verificar apontamentos dos participantes.] " : (garPessoas ? `Analisando o quadro de pessoas envolvidas, ${garPessoas}. ` : "");
-            parecer += document.getElementById('chk_garantia_legal').checked ? "\n- [Info Indisponível] Regularidade documental/ambiental." : (garLegal ? `Legal e ambientalmente, o cooperado ${garLegal}.` : "");
+            parecer += garPessoas ? `Analisando o quadro de pessoas envolvidas, ${garPessoas}. ` : "";
+            parecer += garLegal ? `Legal e ambientalmente, o cooperado ${garLegal}.` : "";
             parecer += "\n\n";
         }
 
-        // BLOCO 6
+        // BLOCO 9 - ENCERRAMENTO: POSICIONAMENTO
         const extra = document.getElementById('q_extra').value.trim();
-        if (extra || document.getElementById('chk_extra').checked) {
-            parecer += "6. CONSIDERAÇÕES FINAIS\n";
-            parecer += document.getElementById('chk_extra').checked ? "Sem fatores extras" : (extra ? `Adicionalmente, cumpre destacar que ${extra}.` : "");
+        const posicionamento = document.getElementById('q_posicionamento').value;
+
+        const textoPosicionamento = { favoravel: "FAVORÁVEL", favoravel_ressalvas: "FAVORÁVEL, COM RESSALVAS", desfavoravel: "DESFAVORÁVEL" };
+
+        if (extra || document.getElementById('chk_extra').checked || posicionamento) {
+            parecer += "9. ENCERRAMENTO: POSICIONAMENTO\n";
+            parecer += document.getElementById('chk_extra').checked ? "Sem fatores extras a acrescentar." : (extra ? `Adicionalmente, cumpre destacar que ${extra}.` : "");
+            if (posicionamento) {
+                parecer += `\n\nPOSICIONAMENTO DO GERENTE/ANALISTA: ${textoPosicionamento[posicionamento]}`;
+            }
         }
 
         document.getElementById('texto_gerado').value = parecer.trim();
+    }
+
+    // Converte uma nota de escala (1 a 5) numa expressão qualitativa padronizada,
+    // usada para gerar trechos condicionais no texto (em vez de só repetir o número).
+    function descreverEscala(valor) {
+        const mapa = { "1": "muito baixa/crítica", "2": "baixa", "3": "mediana", "4": "boa", "5": "muito boa/excelente" };
+        return mapa[String(valor)] || "não avaliada";
+    }
+
+    // BALANÇO PERGUNTADO: calcula ciclo operacional, ciclo financeiro e uma
+    // estimativa simplificada de Necessidade de Capital de Giro (NCG),
+    // a partir dos números coletados na visita.
+    function calcularBalancoPerguntado() {
+        const desabilitado = document.getElementById('chk_balanco_perguntado').checked;
+        ['bp_faturamento','bp_compras','bp_estoque_valor','bp_margem','bp_pmre','bp_pmrv','bp_pmpc','bp_endividamento_valor'].forEach(id => {
+            document.getElementById(id).disabled = desabilitado;
+        });
+
+        const outCiclo = document.getElementById('bp_ciclo_operacional');
+        const outFinanceiro = document.getElementById('bp_ciclo_financeiro');
+        const outNcg = document.getElementById('bp_ncg');
+        const outTesoura = document.getElementById('bp_tesoura');
+
+        if (desabilitado) {
+            outCiclo.textContent = "—"; outFinanceiro.textContent = "—"; outNcg.textContent = "—"; outTesoura.textContent = "—";
+            window.bpTextoParecer = "- [Info Indisponível] Não foi possível coletar os números do balanço perguntado nesta visita.";
+            gerarParecer();
+            return;
+        }
+
+        const faturamento = parseFloat(document.getElementById('bp_faturamento').value) || 0;
+        const compras = parseFloat(document.getElementById('bp_compras').value) || 0;
+        const estoqueValor = parseFloat(document.getElementById('bp_estoque_valor').value) || 0;
+        const margem = parseFloat(document.getElementById('bp_margem').value) || 0;
+        const pmre = parseFloat(document.getElementById('bp_pmre').value) || 0;
+        const pmrv = parseFloat(document.getElementById('bp_pmrv').value) || 0;
+        const pmpc = parseFloat(document.getElementById('bp_pmpc').value) || 0;
+        const endividamentoValor = parseFloat(document.getElementById('bp_endividamento_valor').value) || 0;
+
+        const temAlgumNumero = faturamento || compras || estoqueValor || margem || pmre || pmrv || pmpc || endividamentoValor;
+        if (!temAlgumNumero) {
+            outCiclo.textContent = "—"; outFinanceiro.textContent = "—"; outNcg.textContent = "—"; outTesoura.textContent = "—";
+            window.bpTextoParecer = "";
+            gerarParecer();
+            return;
+        }
+
+        const cicloOperacional = pmre + pmrv;
+        const cicloFinanceiro = cicloOperacional - pmpc;
+        // Estimativa simplificada, comumente usada em treinamentos de análise de crédito:
+        // NCG ≈ (Ciclo Financeiro em dias / 30) × Faturamento médio mensal
+        const ncg = (cicloFinanceiro / 30) * faturamento;
+
+        outCiclo.textContent = cicloOperacional + " dias";
+        outFinanceiro.textContent = cicloFinanceiro + " dias";
+        outNcg.textContent = "R$ " + ncg.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+        let tesouraTexto = "Sem sinais";
+        if (cicloFinanceiro > 0 && ncg > 0) {
+            tesouraTexto = "Atenção: NCG positiva exige capital de giro";
+        }
+        outTesoura.textContent = tesouraTexto;
+
+        window.bpTextoParecer =
+            `Com base nos números coletados na visita (faturamento médio mensal de R$ ${faturamento.toLocaleString('pt-BR', {minimumFractionDigits:2})}, ` +
+            `compras médias mensais de R$ ${compras.toLocaleString('pt-BR', {minimumFractionDigits:2})}, margem média de ${margem}% e prazos de PMRE ${pmre}/PMRV ${pmrv}/PMPC ${pmpc} dias), ` +
+            `o ciclo operacional estimado é de ${cicloOperacional} dias e o ciclo financeiro de ${cicloFinanceiro} dias. ` +
+            `A Necessidade de Capital de Giro (NCG) estimada é de R$ ${ncg.toLocaleString('pt-BR', {minimumFractionDigits:2})}. ` +
+            (endividamentoValor ? `O endividamento total estimado informado foi de R$ ${endividamentoValor.toLocaleString('pt-BR', {minimumFractionDigits:2})}. ` : "") +
+            `Esta é uma estimativa de apoio para orientar a conversa com o cooperado; não substitui o cálculo objetivo feito com os dados do sistema.`;
+
+        gerarParecer();
+    }
+
+    function listarAnexos() {
+        const input = document.getElementById('q_anexos_fotos');
+        const lista = document.getElementById('lista_anexos');
+        if (!input.files || input.files.length === 0) {
+            lista.textContent = "";
+            return;
+        }
+        const nomes = Array.from(input.files).map(f => f.name);
+        lista.innerHTML = `<i class="fa-solid fa-paperclip"></i> ${nomes.length} arquivo(s) selecionado(s): ${nomes.join(", ")}`;
     }
 
     function copiarParecer() {
@@ -593,6 +1016,78 @@
         document.body.classList.add('print-form');
         window.print();
         setTimeout(() => document.body.classList.remove('print-form'), 500);
+    }
+
+    /* =====================================================
+       ENVIO PARA SHAREPOINT (VIA POWER AUTOMATE)
+       ---------------------------------------------------
+       Esta página fica hospedada no GitHub Pages, então não
+       tem acesso à sessão/login do SharePoint. Por isso o
+       envio é feito para um fluxo do Power Automate (URL do
+       gatilho "Quando uma solicitação HTTP for recebida"),
+       que é quem tem a conexão autenticada com o SharePoint.
+       O fluxo recebe este JSON, usa "Analisar JSON" para
+       decodificar, "Preencher um modelo do Microsoft Word"
+       para gerar o .docx, e "Criar arquivo" para salvar na
+       pasta desejada da biblioteca de documentos.
+
+       >>> TROQUE A LINHA ABAIXO PELA URL REAL DO SEU FLUXO <<<
+       (Power Automate > seu fluxo > gatilho HTTP > copiar URL)
+       ===================================================== */
+    const FLOW_URL_SHAREPOINT = "COLE_AQUI_A_URL_DO_SEU_FLUXO_POWER_AUTOMATE";
+
+    async function enviarParaSharePoint() {
+        const statusEl = document.getElementById('status_envio_sharepoint');
+        const btn = document.getElementById('btn_enviar_sharepoint');
+        const textoParecer = document.getElementById('texto_gerado').value;
+        const nomeEmpresa = document.getElementById('q_nome_empresa').value.trim() || "Sem_Nome";
+
+        if (!textoParecer.trim()) {
+            statusEl.style.color = '#b23';
+            statusEl.textContent = 'Preencha o formulário antes de enviar - o relatório está vazio.';
+            return;
+        }
+
+        if (FLOW_URL_SHAREPOINT.includes("COLE_AQUI")) {
+            statusEl.style.color = '#b23';
+            statusEl.textContent = 'Configuração pendente: cole a URL do fluxo do Power Automate no código (constante FLOW_URL_SHAREPOINT).';
+            return;
+        }
+
+        const payload = {
+            empresaNome: nomeEmpresa,
+            dataHoje: new Date().toLocaleDateString('pt-BR'),
+            parecerTexto: textoParecer,
+            selicMeta: document.getElementById('macro_selic_valor') ? document.getElementById('macro_selic_valor').textContent : "",
+            ipca12m: document.getElementById('macro_ipca_valor') ? document.getElementById('macro_ipca_valor').textContent : "",
+            cambio: document.getElementById('macro_cambio_valor') ? document.getElementById('macro_cambio_valor').textContent : ""
+        };
+
+        btn.disabled = true;
+        statusEl.style.color = '#666';
+        statusEl.textContent = 'Enviando...';
+
+        try {
+            // mode: 'no-cors' -> o gatilho HTTP do Power Automate não devolve
+            // cabeçalhos de CORS, então não conseguimos ler a resposta aqui.
+            // O envio funciona como um "dispara e esquece": o fluxo roda do
+            // lado do Power Automate mesmo sem retorno visível pro navegador.
+            await fetch(FLOW_URL_SHAREPOINT, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(payload)
+            });
+
+            statusEl.style.color = 'var(--sicoob-verde-escuro)';
+            statusEl.textContent = 'Enviado! O arquivo .docx deve aparecer na pasta do SharePoint em alguns segundos.';
+        } catch (e) {
+            console.error(e);
+            statusEl.style.color = '#b23';
+            statusEl.textContent = 'Falha ao enviar. Verifique sua conexão e tente novamente.';
+        } finally {
+            btn.disabled = false;
+        }
     }
 
     /* =====================================================
@@ -705,6 +1200,7 @@
 
             document.getElementById('macro_selic_valor').textContent = selic.valor.replace('.', ',') + '% a.a.';
             document.getElementById('macro_selic_valor').classList.remove('loading');
+            document.getElementById('macro_selic_data').textContent = 'Vigente desde ' + selic.data;
 
             document.getElementById('macro_ipca_valor').textContent = ipca.valor.replace('.', ',') + '%';
             document.getElementById('macro_ipca_valor').classList.remove('loading');
