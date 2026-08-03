@@ -1042,17 +1042,13 @@
 
   <div class="tab-nav" id="tabNav">
     <button class="tab-btn active" data-tab="tabCalendario">Calendário</button>
-    <button class="tab-btn" data-tab="tabEixos">Cadastrar eixo de atuação</button>
+    <button class="tab-btn" data-tab="tabEixos">Cadastrar recomendação técnica</button>
     <button class="tab-btn" data-tab="tabIndicadores">Indicadores</button>
   </div>
 
   <div class="tab-panel active" id="tabCalendario">
 
   <div class="toolbar">
-    <div class="filter-bar" id="filterBar">
-      <button class="filter-btn active" data-eixo="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</button>
-      <button class="filter-btn active" data-eixo="Gestão do Crédito">Gestão do Crédito</button>
-    </div>
     <span style="font-size:11.5px;color:var(--ink-soft);">Dê 2 cliques em um evento para editar</span>
   </div>
 
@@ -1064,7 +1060,7 @@
       </select>
     </div>
     <div class="field">
-      <label for="filtroSubitem">Subitem</label>
+      <label for="filtroSubitem">Recomendação Técnica</label>
       <select id="filtroSubitem">
         <option value="">Todos</option>
       </select>
@@ -1106,12 +1102,10 @@
   <div class="tab-panel" id="tabIndicadores">
     <div class="indicador-card">
       <h2>Ações por mês e status</h2>
-      <div class="field" style="max-width:280px;">
-        <label for="filtroEixoGrafico">Filtrar por Eixo</label>
-        <select id="filtroEixoGrafico">
-          <option value="todos">Todos os eixos</option>
-          <option value="Apoio aos Produtos de Crédito">Apoio aos Produtos de Crédito</option>
-          <option value="Gestão do Crédito">Gestão do Crédito</option>
+      <div class="field" style="max-width:320px;">
+        <label for="filtroEixoAtuacaoGrafico">Filtrar por Eixo de atuação</label>
+        <select id="filtroEixoAtuacaoGrafico">
+          <option value="">Todos os eixos de atuação</option>
         </select>
       </div>
       <canvas id="graficoStatusMes" height="90"></canvas>
@@ -1142,20 +1136,16 @@
     <h2 id="modalTitle">Nova ação</h2>
     <form id="eventForm">
       <div class="field">
-        <label>Eixo</label>
-        <div class="ms-wrap">
-          <button type="button" class="ms-trigger" id="eixoTrigger">Selecionar eixo</button>
-          <div class="ms-panel" id="eixoPanel">
-            <label class="ms-item">
-              <input type="checkbox" value="Apoio aos Produtos de Crédito">
-              <span>Apoio aos Produtos de Crédito</span>
-            </label>
-            <label class="ms-item">
-              <input type="checkbox" value="Gestão do Crédito">
-              <span>Gestão do Crédito</span>
-            </label>
-          </div>
-        </div>
+        <label for="eixoAtuacao">Eixo de atuação</label>
+        <select id="eixoAtuacao">
+          <option value="">Selecione um eixo de atuação</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="subitemCodigo">Recomendação Técnica</label>
+        <select id="subitemCodigo">
+          <option value="">Selecione o eixo de atuação primeiro</option>
+        </select>
       </div>
       <div class="field">
         <label for="entrega">Nome da entrega</label>
@@ -1200,18 +1190,6 @@
         </div>
       </div>
       <div class="field">
-        <label for="eixoAtuacao">Eixo de atuação</label>
-        <select id="eixoAtuacao">
-          <option value="">Selecione um eixo de atuação</option>
-        </select>
-      </div>
-      <div class="field">
-        <label for="subitemCodigo">Subitem</label>
-        <select id="subitemCodigo">
-          <option value="">Selecione o eixo de atuação primeiro</option>
-        </select>
-      </div>
-      <div class="field">
         <label for="metaAcao">Meta</label>
         <textarea id="metaAcao" placeholder="Qual é a meta desta ação?"></textarea>
       </div>
@@ -1242,11 +1220,11 @@
   </div>
 </div>
 
-<!-- Popup de Descrição do subitem -->
+<!-- Popup de Descrição da recomendação técnica -->
 <div class="overlay" id="descricaoOverlay">
   <div class="modal meta-popup">
     <button type="button" class="popup-close" id="fecharDescricaoPopup" title="Fechar">×</button>
-    <h2>Descrição do subitem</h2>
+    <h2>Descrição da recomendação técnica</h2>
     <p id="descricaoPopupTexto"></p>
   </div>
 </div>
@@ -1304,9 +1282,6 @@
       console.error("Erro ao ler eixos de atuação:", error);
     });
   }
-
-  // Filtro: todas as categorias ativas por padrão
-  let filtroAtivo = new Set(["Apoio aos Produtos de Crédito", "Gestão do Crédito"]);
 
   // Filtro por participante (foto): vazio = sem filtro, mostra todos os eventos
   let participantesFiltroAtivo = new Set();
@@ -1523,7 +1498,7 @@
       select.innerHTML = `<option value="">Selecione o eixo de atuação primeiro</option>`;
       return;
     }
-    select.innerHTML = `<option value="">Selecione o subitem</option>` +
+    select.innerHTML = `<option value="">Selecione a recomendação técnica</option>` +
       ex.subitens.map(s => `<option value="${s.codigo}">${s.codigo} — ${escapeHtml(s.descricao).slice(0, 70)}${s.descricao.length > 70 ? "…" : ""}</option>`).join("");
     if (subitemSelecionado) select.value = subitemSelecionado;
   }
@@ -1539,6 +1514,14 @@
     select.innerHTML = `<option value="">Todos</option>` +
       eixosAtuacao.map(ex => `<option value="${ex.id}">${ex.numero}. ${escapeHtml(ex.titulo)}</option>`).join("");
     select.value = valorAtual;
+
+    const selectGrafico = document.getElementById("filtroEixoAtuacaoGrafico");
+    if (selectGrafico){
+      const valorAtualGrafico = selectGrafico.value;
+      selectGrafico.innerHTML = `<option value="">Todos os eixos de atuação</option>` +
+        eixosAtuacao.map(ex => `<option value="${ex.id}">${ex.numero}. ${escapeHtml(ex.titulo)}</option>`).join("");
+      selectGrafico.value = valorAtualGrafico;
+    }
   }
 
   function popularFiltroSubitem(eixoAtuacaoId){
@@ -1633,36 +1616,6 @@
     }
   });
 
-  // ====== Multiselect de Eixo (permite marcar um ou os dois) ======
-  let eixoSelecionado = new Set();
-
-  function atualizarTriggerEixo(){
-    const trigger = document.getElementById("eixoTrigger");
-    trigger.textContent = eixoSelecionado.size === 0
-      ? "Selecionar eixo"
-      : Array.from(eixoSelecionado).join(" + ");
-  }
-
-  document.querySelectorAll("#eixoPanel input[type='checkbox']").forEach(chk => {
-    chk.addEventListener("change", () => {
-      if (chk.checked) eixoSelecionado.add(chk.value);
-      else eixoSelecionado.delete(chk.value);
-      atualizarTriggerEixo();
-    });
-  });
-
-  document.getElementById("eixoTrigger").addEventListener("click", (e) => {
-    e.stopPropagation();
-    document.getElementById("eixoPanel").classList.toggle("open");
-  });
-  document.addEventListener("click", (e) => {
-    const panel = document.getElementById("eixoPanel");
-    const trigger = document.getElementById("eixoTrigger");
-    if (panel && !panel.contains(e.target) && e.target !== trigger){
-      panel.classList.remove("open");
-    }
-  });
-
   const nomesMeses = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
   // Escapa qualquer texto antes de inserir no HTML, prevenindo XSS
@@ -1691,10 +1644,6 @@
     calendar.innerHTML = "";
 
     const eventosFiltrados = eventos
-      .filter(ev => {
-        const eixosDoItem = Array.isArray(ev.eixo) ? ev.eixo : (ev.eixo ? [ev.eixo] : []);
-        return eixosDoItem.some(e => filtroAtivo.has(e));
-      })
       .filter(ev => participantesFiltroAtivo.size === 0 || (ev.participantes || []).some(p => participantesFiltroAtivo.has(p)))
       .filter(ev => !filtroEixoAtuacaoAtivo || ev.eixoAtuacaoId === filtroEixoAtuacaoAtivo)
       .filter(ev => !filtroSubitemAtivo || ev.subitemCodigo === filtroSubitemAtivo)
@@ -1775,7 +1724,6 @@
 
           ev.innerHTML = `
             <button class="del-btn" data-id="${escapeHtml(item.id)}" title="Excluir evento">×</button>
-            <span class="eixo-tag">${escapeHtml((Array.isArray(item.eixo) ? item.eixo : (item.eixo ? [item.eixo] : [])).join(" + "))}</span>
             <span class="titulo">${escapeHtml(item.entrega)}</span>
             ${eixoAtuacaoHtml}
             ${cooperativasTextoHtml}
@@ -1971,21 +1919,6 @@
     });
   }
 
-  // Filtro de categorias
-  document.querySelectorAll(".filter-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const eixo = btn.getAttribute("data-eixo");
-      if (filtroAtivo.has(eixo)){
-        filtroAtivo.delete(eixo);
-        btn.classList.remove("active");
-      } else {
-        filtroAtivo.add(eixo);
-        btn.classList.add("active");
-      }
-      renderCalendar();
-    });
-  });
-
   // Modal
   const overlay = document.getElementById("overlay");
   const modalTitle = document.getElementById("modalTitle");
@@ -2011,7 +1944,7 @@
   function abrirPopupDescricao(texto){
     document.getElementById("descricaoPopupTexto").textContent = texto && texto.trim()
       ? texto
-      : "Nenhum subitem vinculado a esta ação.";
+      : "Nenhuma recomendação técnica vinculada a esta ação.";
     document.getElementById("descricaoOverlay").classList.add("open");
   }
 
@@ -2028,10 +1961,6 @@
     submitBtn.textContent = "Salvar evento";
     deleteFromModalBtn.style.display = "none";
     document.getElementById("eventForm").reset();
-
-    eixoSelecionado = new Set();
-    document.querySelectorAll("#eixoPanel input[type='checkbox']").forEach(chk => chk.checked = false);
-    atualizarTriggerEixo();
 
     participantesSelecionados = new Set();
     document.querySelectorAll("#participantesPanel input[type='checkbox']").forEach(chk => chk.checked = false);
@@ -2056,13 +1985,6 @@
     modalTitle.textContent = "Editar evento";
     submitBtn.textContent = "Salvar alterações";
     deleteFromModalBtn.style.display = "inline-block";
-
-    const eixosDoItem = Array.isArray(item.eixo) ? item.eixo : (item.eixo ? [item.eixo] : []);
-    eixoSelecionado = new Set(eixosDoItem);
-    document.querySelectorAll("#eixoPanel input[type='checkbox']").forEach(chk => {
-      chk.checked = eixoSelecionado.has(chk.value);
-    });
-    atualizarTriggerEixo();
 
     document.getElementById("entrega").value = item.entrega;
     document.getElementById("status").value = item.status;
@@ -2107,15 +2029,9 @@
   document.getElementById("eventForm").addEventListener("submit", (e) => {
     e.preventDefault();
 
-    if (eixoSelecionado.size === 0){
-      alert("Selecione ao menos um Eixo.");
-      return;
-    }
-
     const anoEscolhido = Number(document.getElementById("anoAcao").value) || anoAtual;
 
     const dadosForm = {
-      eixo: Array.from(eixoSelecionado),
       entrega: document.getElementById("entrega").value.trim(),
       status: document.getElementById("status").value,
       eixoAtuacaoId: document.getElementById("eixoAtuacao").value || null,
@@ -2217,8 +2133,8 @@
               ${listaAcoesHtml}
             </div>
             <span class="subitem-check ${temRealizado ? "ok" : "pendente"}">${temRealizado ? "✓ Realizado" : "Pendente"}</span>
-            <button type="button" class="subitem-editar-btn" data-editar-subitem="${ex.id}" data-codigo-subitem="${escapeHtml(s.codigo)}" title="Editar subitem">✎</button>
-            <button type="button" class="subitem-excluir-btn" data-excluir-subitem="${ex.id}" data-codigo-subitem="${escapeHtml(s.codigo)}" title="Excluir subitem">🗑</button>
+            <button type="button" class="subitem-editar-btn" data-editar-subitem="${ex.id}" data-codigo-subitem="${escapeHtml(s.codigo)}" title="Editar recomendação técnica">✎</button>
+            <button type="button" class="subitem-excluir-btn" data-excluir-subitem="${ex.id}" data-codigo-subitem="${escapeHtml(s.codigo)}" title="Excluir recomendação técnica">🗑</button>
           </div>
         `;
       }).join("");
@@ -2232,10 +2148,10 @@
               <button type="button" class="eixo-excluir-btn" data-excluir-eixo="${ex.id}" title="Excluir eixo de atuação">🗑 Excluir</button>
             </div>
           </div>
-          ${linhasSubitens || `<p style="color:var(--ink-soft);font-size:12px;">Nenhum subitem cadastrado ainda.</p>`}
+          ${linhasSubitens || `<p style="color:var(--ink-soft);font-size:12px;">Nenhuma recomendação técnica cadastrada ainda.</p>`}
           <div class="novo-subitem-row">
-            <input type="text" class="descricao-input" placeholder="Descrição do subitem (o número ${ex.numero}.${subitens.length + 1} é gerado automaticamente)" data-novo-subitem-descricao="${ex.id}">
-            <button type="button" data-adicionar-subitem="${ex.id}">+ Subitem</button>
+            <input type="text" class="descricao-input" placeholder="Descrição da recomendação técnica (o número ${ex.numero}.${subitens.length + 1} é gerado automaticamente)" data-novo-subitem-descricao="${ex.id}">
+            <button type="button" data-adicionar-subitem="${ex.id}">+ Recomendação Técnica</button>
           </div>
         </div>
       `;
@@ -2249,15 +2165,15 @@
         const inputDescricao = document.querySelector(`[data-novo-subitem-descricao="${exId}"]`);
         const descricao = inputDescricao.value.trim();
         if (!descricao){
-          alert("Preencha a descrição do subitem.");
+          alert("Preencha a descrição da recomendação técnica.");
           return;
         }
         const codigo = `${ex.numero}.${(ex.subitens || []).length + 1}`;
         eixosAtuacaoRef.doc(exId).update({
           subitens: firebase.firestore.FieldValue.arrayUnion({ codigo, descricao })
         }).catch(err => {
-          console.error("Erro ao adicionar subitem:", err);
-          alert("Não foi possível adicionar o subitem.");
+          console.error("Erro ao adicionar recomendação técnica:", err);
+          alert("Não foi possível adicionar a recomendação técnica.");
         });
       });
     });
@@ -2300,7 +2216,7 @@
         const subitem = (ex.subitens || []).find(s => s.codigo === codigoAtual);
         if (!subitem) return;
 
-        const novaDescricao = prompt("Descrição do subitem:", subitem.descricao);
+        const novaDescricao = prompt("Descrição da recomendação técnica:", subitem.descricao);
         if (novaDescricao === null || !novaDescricao.trim()) return;
 
         const novosSubitens = ex.subitens.map(s =>
@@ -2308,8 +2224,8 @@
         );
 
         eixosAtuacaoRef.doc(exId).update({ subitens: novosSubitens }).catch(err => {
-          console.error("Erro ao editar subitem:", err);
-          alert("Não foi possível editar o subitem.");
+          console.error("Erro ao editar recomendação técnica:", err);
+          alert("Não foi possível editar a recomendação técnica.");
         });
       });
     });
@@ -2321,7 +2237,7 @@
         const ex = eixosAtuacao.find(e => e.id === exId);
         if (!ex) return;
 
-        if (!confirm(`Excluir o subitem ${codigo}? Os subitens seguintes serão renumerados automaticamente (ex: 1.3 vira 1.2), e as ações já vinculadas serão atualizadas para acompanhar a nova numeração.`)){
+        if (!confirm(`Excluir a recomendação técnica ${codigo}? As seguintes serão renumeradas automaticamente (ex: 1.3 vira 1.2), e as ações já vinculadas serão atualizadas para acompanhar a nova numeração.`)){
           return;
         }
 
@@ -2353,8 +2269,8 @@
             return Promise.all(atualizacoes);
           })
           .catch(err => {
-            console.error("Erro ao excluir/renumerar subitem:", err);
-            alert("Não foi possível excluir o subitem.");
+            console.error("Erro ao excluir/renumerar recomendação técnica:", err);
+            alert("Não foi possível excluir a recomendação técnica.");
           });
       });
     });
@@ -2370,7 +2286,7 @@
   let graficoStatusMesInstancia = null;
   let graficoCooperativasInstancia = null;
 
-  document.getElementById("filtroEixoGrafico").addEventListener("change", atualizarIndicadores);
+  document.getElementById("filtroEixoAtuacaoGrafico").addEventListener("change", atualizarGraficoStatusMes);
 
   function atualizarIndicadores(){
     atualizarGraficoStatusMes();
@@ -2383,12 +2299,8 @@
     const canvas = document.getElementById("graficoStatusMes");
     if (!canvas || typeof Chart === "undefined") return;
 
-    const filtroEixo = document.getElementById("filtroEixoGrafico").value;
-    const eventosFiltrados = eventos.filter(ev => {
-      if (filtroEixo === "todos") return true;
-      const eixosDoItem = Array.isArray(ev.eixo) ? ev.eixo : (ev.eixo ? [ev.eixo] : []);
-      return eixosDoItem.includes(filtroEixo);
-    });
+    const filtroEixoAtuacao = document.getElementById("filtroEixoAtuacaoGrafico").value;
+    const eventosFiltrados = eventos.filter(ev => !filtroEixoAtuacao || ev.eixoAtuacaoId === filtroEixoAtuacao);
 
     const contagem = {
       "Pendente": Array(12).fill(0),
@@ -2538,7 +2450,7 @@
     container.innerHTML = `
       <table class="indicador-table">
         <thead>
-          <tr><th>Eixo de atuação / Subitem</th><th>Pendente</th><th>Em andamento</th><th>Realizado</th></tr>
+          <tr><th>Eixo de atuação / Recomendação Técnica</th><th>Pendente</th><th>Em andamento</th><th>Realizado</th></tr>
         </thead>
         <tbody>${blocos}</tbody>
       </table>
