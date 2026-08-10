@@ -1054,16 +1054,25 @@
 
   <div class="toolbar-extra" id="toolbarExtra">
     <div class="field">
-      <label for="filtroEixoAtuacao">Eixo de atuação</label>
-      <select id="filtroEixoAtuacao">
-        <option value="">Todos</option>
-      </select>
+      <label>Eixo de atuação</label>
+      <div class="ms-wrap">
+        <button type="button" class="ms-trigger" id="filtroEixoAtuacaoTrigger">Todos os eixos</button>
+        <div class="ms-panel" id="filtroEixoAtuacaoPanel"></div>
+      </div>
     </div>
     <div class="field">
-      <label for="filtroSubitem">Recomendação Técnica</label>
-      <select id="filtroSubitem">
-        <option value="">Todos</option>
-      </select>
+      <label>Recomendação Técnica</label>
+      <div class="ms-wrap">
+        <button type="button" class="ms-trigger" id="filtroSubitemTrigger">Todas</button>
+        <div class="ms-panel" id="filtroSubitemPanel"></div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Status</label>
+      <div class="ms-wrap">
+        <button type="button" class="ms-trigger" id="filtroStatusTrigger">Todos os status</button>
+        <div class="ms-panel" id="filtroStatusPanel"></div>
+      </div>
     </div>
     <div class="field">
       <label>Cooperativas participantes</label>
@@ -1103,10 +1112,11 @@
     <div class="indicador-card">
       <h2>Ações por mês e status</h2>
       <div class="field" style="max-width:320px;">
-        <label for="filtroEixoAtuacaoGrafico">Filtrar por Eixo de atuação</label>
-        <select id="filtroEixoAtuacaoGrafico">
-          <option value="">Todos os eixos de atuação</option>
-        </select>
+        <label>Filtrar por Eixo de atuação</label>
+        <div class="ms-wrap">
+          <button type="button" class="ms-trigger" id="filtroEixoAtuacaoGraficoTrigger">Todos os eixos de atuação</button>
+          <div class="ms-panel" id="filtroEixoAtuacaoGraficoPanel"></div>
+        </div>
       </div>
       <canvas id="graficoStatusMes" height="90"></canvas>
     </div>
@@ -1276,6 +1286,8 @@
       eixosAtuacao = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       popularSelectEixoAtuacao();
       popularFiltroEixoAtuacao();
+      popularFiltroSubitem();
+      popularFiltroEixoAtuacaoGrafico();
       renderEixosAtuacao();
       atualizarIndicadores();
     }, error => {
@@ -1287,8 +1299,9 @@
   let participantesFiltroAtivo = new Set();
 
   // Filtros novos da Aba 1: eixo de atuação, subitem e cooperativas
-  let filtroEixoAtuacaoAtivo = "";
-  let filtroSubitemAtivo = "";
+  let filtroEixoAtuacaoAtivos = new Set();
+  let filtroSubitemAtivos = new Set();
+  let filtroStatusAtivos = new Set();
   let filtroCooperativasAtivas = new Set();
 
   // Estrutura da equipe, usada pra popular o campo Participantes e os avatares/comentários
@@ -1507,44 +1520,207 @@
     popularSelectSubitem(e.target.value, "");
   });
 
-  // ====== Filtros da Aba 1: eixo de atuação, subitem e cooperativas ======
+  // ====== Filtros da Aba 1: eixo de atuação, recomendação técnica, status e cooperativas (multiseleção) ======
+
   function popularFiltroEixoAtuacao(){
-    const select = document.getElementById("filtroEixoAtuacao");
-    const valorAtual = select.value;
-    select.innerHTML = `<option value="">Todos</option>` +
-      eixosAtuacao.map(ex => `<option value="${ex.id}">${ex.numero}. ${escapeHtml(ex.titulo)}</option>`).join("");
-    select.value = valorAtual;
+    const panel = document.getElementById("filtroEixoAtuacaoPanel");
+    const trigger = document.getElementById("filtroEixoAtuacaoTrigger");
 
-    const selectGrafico = document.getElementById("filtroEixoAtuacaoGrafico");
-    if (selectGrafico){
-      const valorAtualGrafico = selectGrafico.value;
-      selectGrafico.innerHTML = `<option value="">Todos os eixos de atuação</option>` +
-        eixosAtuacao.map(ex => `<option value="${ex.id}">${ex.numero}. ${escapeHtml(ex.titulo)}</option>`).join("");
-      selectGrafico.value = valorAtualGrafico;
+    panel.innerHTML = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>` + eixosAtuacao.map(ex => `
+      <label class="ms-item">
+        <input type="checkbox" value="${ex.id}">
+        <span>${ex.numero}. ${escapeHtml(ex.titulo)}</span>
+      </label>
+    `).join("");
+
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+    itensIndividuais().forEach(chk => { chk.checked = filtroEixoAtuacaoAtivos.has(chk.value); });
+    panel.querySelector(".ms-select-all").checked = itensIndividuais().length > 0 && [...itensIndividuais()].every(c => c.checked);
+
+    function atualizarTrigger(){
+      if (filtroEixoAtuacaoAtivos.size === 0){
+        trigger.textContent = "Todos os eixos";
+      } else {
+        const nomes = eixosAtuacao.filter(ex => filtroEixoAtuacaoAtivos.has(ex.id)).map(ex => `${ex.numero}`);
+        trigger.textContent = nomes.length <= 3 ? "Eixo " + nomes.join(", ") : `${nomes.length} eixos selecionados`;
+      }
     }
+    atualizarTrigger();
+
+    itensIndividuais().forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) filtroEixoAtuacaoAtivos.add(chk.value);
+        else filtroEixoAtuacaoAtivos.delete(chk.value);
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
+        atualizarTrigger();
+        popularFiltroSubitem();
+        renderCalendar();
+      });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) filtroEixoAtuacaoAtivos.add(chk.value);
+        else filtroEixoAtuacaoAtivos.delete(chk.value);
+      });
+      atualizarTrigger();
+      popularFiltroSubitem();
+      renderCalendar();
+    });
   }
 
-  function popularFiltroSubitem(eixoAtuacaoId){
-    const select = document.getElementById("filtroSubitem");
-    const ex = eixosAtuacao.find(e => e.id === eixoAtuacaoId);
-    if (!ex || !ex.subitens || ex.subitens.length === 0){
-      select.innerHTML = `<option value="">Todos</option>`;
-      return;
+  document.getElementById("filtroEixoAtuacaoTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("filtroEixoAtuacaoPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("filtroEixoAtuacaoPanel");
+    const trigger = document.getElementById("filtroEixoAtuacaoTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
     }
-    select.innerHTML = `<option value="">Todos</option>` +
-      ex.subitens.map(s => `<option value="${s.codigo}">${s.codigo}</option>`).join("");
-  }
-
-  document.getElementById("filtroEixoAtuacao").addEventListener("change", (e) => {
-    filtroEixoAtuacaoAtivo = e.target.value;
-    filtroSubitemAtivo = "";
-    popularFiltroSubitem(filtroEixoAtuacaoAtivo);
-    renderCalendar();
   });
 
-  document.getElementById("filtroSubitem").addEventListener("change", (e) => {
-    filtroSubitemAtivo = e.target.value;
-    renderCalendar();
+  function popularFiltroSubitem(){
+    const panel = document.getElementById("filtroSubitemPanel");
+    const trigger = document.getElementById("filtroSubitemTrigger");
+
+    // Se algum eixo estiver marcado no filtro acima, mostra só as recomendações técnicas
+    // desses eixos; senão, mostra de todos os eixos cadastrados.
+    const eixosParaListar = filtroEixoAtuacaoAtivos.size > 0
+      ? eixosAtuacao.filter(ex => filtroEixoAtuacaoAtivos.has(ex.id))
+      : eixosAtuacao;
+
+    // Remove do filtro ativo qualquer chave que não pertença mais aos eixos listados
+    const chavesValidas = new Set();
+    eixosParaListar.forEach(ex => (ex.subitens || []).forEach(s => chavesValidas.add(`${ex.id}::${s.codigo}`)));
+    filtroSubitemAtivos.forEach(chave => { if (!chavesValidas.has(chave)) filtroSubitemAtivos.delete(chave); });
+
+    let html = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>`;
+    eixosParaListar.forEach(ex => {
+      const subitens = ex.subitens || [];
+      if (subitens.length === 0) return;
+      html += `<div class="ms-group-label">${ex.numero}. ${escapeHtml(ex.titulo)}</div>`;
+      subitens.forEach(s => {
+        html += `<label class="ms-item">
+          <input type="checkbox" value="${ex.id}::${escapeHtml(s.codigo)}">
+          <span>${escapeHtml(s.codigo)} — ${escapeHtml(s.descricao)}</span>
+        </label>`;
+      });
+    });
+    panel.innerHTML = html;
+
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+    itensIndividuais().forEach(chk => { chk.checked = filtroSubitemAtivos.has(chk.value); });
+    panel.querySelector(".ms-select-all").checked = itensIndividuais().length > 0 && [...itensIndividuais()].every(c => c.checked);
+
+    function atualizarTrigger(){
+      trigger.textContent = filtroSubitemAtivos.size === 0
+        ? "Todas"
+        : `${filtroSubitemAtivos.size} selecionada(s)`;
+    }
+    atualizarTrigger();
+
+    itensIndividuais().forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) filtroSubitemAtivos.add(chk.value);
+        else filtroSubitemAtivos.delete(chk.value);
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
+        atualizarTrigger();
+        renderCalendar();
+      });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) filtroSubitemAtivos.add(chk.value);
+        else filtroSubitemAtivos.delete(chk.value);
+      });
+      atualizarTrigger();
+      renderCalendar();
+    });
+  }
+
+  document.getElementById("filtroSubitemTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("filtroSubitemPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("filtroSubitemPanel");
+    const trigger = document.getElementById("filtroSubitemTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
+  });
+
+  function popularFiltroStatus(){
+    const panel = document.getElementById("filtroStatusPanel");
+    const trigger = document.getElementById("filtroStatusTrigger");
+    const opcoes = ["Pendente", "Em andamento", "Realizado"];
+
+    panel.innerHTML = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>` + opcoes.map(st => `
+      <label class="ms-item">
+        <input type="checkbox" value="${st}">
+        <span>${st}</span>
+      </label>
+    `).join("");
+
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+
+    function atualizarTrigger(){
+      trigger.textContent = filtroStatusAtivos.size === 0
+        ? "Todos os status"
+        : Array.from(filtroStatusAtivos).join(", ");
+    }
+    atualizarTrigger();
+
+    itensIndividuais().forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) filtroStatusAtivos.add(chk.value);
+        else filtroStatusAtivos.delete(chk.value);
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
+        atualizarTrigger();
+        renderCalendar();
+      });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) filtroStatusAtivos.add(chk.value);
+        else filtroStatusAtivos.delete(chk.value);
+      });
+      atualizarTrigger();
+      renderCalendar();
+    });
+  }
+
+  popularFiltroStatus();
+
+  document.getElementById("filtroStatusTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("filtroStatusPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("filtroStatusPanel");
+    const trigger = document.getElementById("filtroStatusTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
   });
 
   function popularFiltroCooperativasPanel(){
@@ -1645,8 +1821,9 @@
 
     const eventosFiltrados = eventos
       .filter(ev => participantesFiltroAtivo.size === 0 || (ev.participantes || []).some(p => participantesFiltroAtivo.has(p)))
-      .filter(ev => !filtroEixoAtuacaoAtivo || ev.eixoAtuacaoId === filtroEixoAtuacaoAtivo)
-      .filter(ev => !filtroSubitemAtivo || ev.subitemCodigo === filtroSubitemAtivo)
+      .filter(ev => filtroEixoAtuacaoAtivos.size === 0 || filtroEixoAtuacaoAtivos.has(ev.eixoAtuacaoId))
+      .filter(ev => filtroSubitemAtivos.size === 0 || filtroSubitemAtivos.has(`${ev.eixoAtuacaoId}::${ev.subitemCodigo}`))
+      .filter(ev => filtroStatusAtivos.size === 0 || filtroStatusAtivos.has(ev.status))
       .filter(ev => filtroCooperativasAtivas.size === 0 || (ev.cooperativas || []).some(c => filtroCooperativasAtivas.has(c)));
 
     for (let m = 1; m <= 12; m++){
@@ -2285,8 +2462,70 @@
   // ====== ABA 3: INDICADORES (gráfico + tabelas) ======
   let graficoStatusMesInstancia = null;
   let graficoCooperativasInstancia = null;
+  let filtroEixoAtuacaoGraficoAtivos = new Set();
 
-  document.getElementById("filtroEixoAtuacaoGrafico").addEventListener("change", atualizarGraficoStatusMes);
+  function popularFiltroEixoAtuacaoGrafico(){
+    const panel = document.getElementById("filtroEixoAtuacaoGraficoPanel");
+    const trigger = document.getElementById("filtroEixoAtuacaoGraficoTrigger");
+    if (!panel || !trigger) return;
+
+    panel.innerHTML = `<label class="ms-item ms-select-all-item">
+      <input type="checkbox" class="ms-select-all">
+      <span><strong>Selecionar todos</strong></span>
+    </label>` + eixosAtuacao.map(ex => `
+      <label class="ms-item">
+        <input type="checkbox" value="${ex.id}">
+        <span>${ex.numero}. ${escapeHtml(ex.titulo)}</span>
+      </label>
+    `).join("");
+
+    const itensIndividuais = () => panel.querySelectorAll('input[type="checkbox"]:not(.ms-select-all)');
+    itensIndividuais().forEach(chk => { chk.checked = filtroEixoAtuacaoGraficoAtivos.has(chk.value); });
+    panel.querySelector(".ms-select-all").checked = itensIndividuais().length > 0 && [...itensIndividuais()].every(c => c.checked);
+
+    function atualizarTrigger(){
+      if (filtroEixoAtuacaoGraficoAtivos.size === 0){
+        trigger.textContent = "Todos os eixos de atuação";
+      } else {
+        const nomes = eixosAtuacao.filter(ex => filtroEixoAtuacaoGraficoAtivos.has(ex.id)).map(ex => `${ex.numero}`);
+        trigger.textContent = nomes.length <= 3 ? "Eixo " + nomes.join(", ") : `${nomes.length} eixos selecionados`;
+      }
+    }
+    atualizarTrigger();
+
+    itensIndividuais().forEach(chk => {
+      chk.addEventListener("change", () => {
+        if (chk.checked) filtroEixoAtuacaoGraficoAtivos.add(chk.value);
+        else filtroEixoAtuacaoGraficoAtivos.delete(chk.value);
+        panel.querySelector(".ms-select-all").checked = [...itensIndividuais()].every(c => c.checked);
+        atualizarTrigger();
+        atualizarGraficoStatusMes();
+      });
+    });
+
+    panel.querySelector(".ms-select-all").addEventListener("change", (e) => {
+      const marcar = e.target.checked;
+      itensIndividuais().forEach(chk => {
+        chk.checked = marcar;
+        if (marcar) filtroEixoAtuacaoGraficoAtivos.add(chk.value);
+        else filtroEixoAtuacaoGraficoAtivos.delete(chk.value);
+      });
+      atualizarTrigger();
+      atualizarGraficoStatusMes();
+    });
+  }
+
+  document.getElementById("filtroEixoAtuacaoGraficoTrigger").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("filtroEixoAtuacaoGraficoPanel").classList.toggle("open");
+  });
+  document.addEventListener("click", (e) => {
+    const panel = document.getElementById("filtroEixoAtuacaoGraficoPanel");
+    const trigger = document.getElementById("filtroEixoAtuacaoGraficoTrigger");
+    if (panel && !panel.contains(e.target) && e.target !== trigger){
+      panel.classList.remove("open");
+    }
+  });
 
   function atualizarIndicadores(){
     atualizarGraficoStatusMes();
@@ -2299,8 +2538,9 @@
     const canvas = document.getElementById("graficoStatusMes");
     if (!canvas || typeof Chart === "undefined") return;
 
-    const filtroEixoAtuacao = document.getElementById("filtroEixoAtuacaoGrafico").value;
-    const eventosFiltrados = eventos.filter(ev => !filtroEixoAtuacao || ev.eixoAtuacaoId === filtroEixoAtuacao);
+    const eventosFiltrados = eventos.filter(ev =>
+      filtroEixoAtuacaoGraficoAtivos.size === 0 || filtroEixoAtuacaoGraficoAtivos.has(ev.eixoAtuacaoId)
+    );
 
     const contagem = {
       "Pendente": Array(12).fill(0),
